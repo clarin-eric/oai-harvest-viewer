@@ -1,5 +1,18 @@
+// OAI DreamFactory API
 var base = "http://192.168.99.100/api/v2/oai/_table/";
 var key = "49b6352d3f5999db313bb4bf6d8a5980800b7264c8f8c23ffe432061ed0bb19d"
+
+// react-bootstrap imports
+var PageHeader = ReactBootstrap.PageHeader;
+var Table = ReactBootstrap.Table;
+var Panel = ReactBootstrap.Panel;
+var Input = ReactBootstrap.Input;
+var Button = ReactBootstrap.Button;
+var Glyphicon = ReactBootstrap.Glyphicon;
+var Pagination = ReactBootstrap.Pagination;
+var Grid = ReactBootstrap.Grid;
+var Row = ReactBootstrap.Row;
+var Col = ReactBootstrap.Col;
 
 var Endpoints = React.createClass({
   getInitialState: function() {
@@ -24,16 +37,21 @@ var Endpoints = React.createClass({
         <Endpoint id={endpoint.id} name={endpoint.name}/>
       );
     });
-    return <table>
-      <thead>
-        <tr>
-          <th>Endpoints</th>
-        </tr>
-      </thead>
-      <tbody>
-        {endpoints}
-      </tbody>
-    </table>;
+    return <Col xs={12} md={12} className="endpoints" fill>
+      <Panel fill>
+        <span className="section col-xs-4">Endpoints</span>
+      </Panel>
+      <Table striped bordered condensed hover fill>
+        <thead>
+          <tr>
+            <th>name</th>
+          </tr>
+        </thead>
+        <tbody>
+          {endpoints}
+        </tbody>
+      </Table>
+    </Col>;
   }
 });
 
@@ -85,16 +103,37 @@ var Records = React.createClass({
         <Record id={record.id} identifier={record.identifier}/>
       );
     });
-    return <table>
-      <thead>
-        <tr>
-          <th>Records</th>
-        </tr>
-      </thead>
-      <tbody>
-        {records}
-      </tbody>
-    </table>;
+    var filter = <Button>
+      <Glyphicon glyph="filter" />
+    </Button>;
+          return <Col  xs={12} md={12} className="records" fill>
+      <Panel fill>
+        <span className="section col-xs-4">Records</span>
+        <span className="col-xs-3">
+          <Input className="filter" type="text" buttonAfter={filter} />
+        </span>
+        <span className="col-xs-5">
+          <Pagination className="pagination" 
+            prev
+            next
+            first
+            last
+            ellipsis
+            items={20}
+            maxButtons={5} />
+        </span>
+      </Panel>
+      <Table striped bordered condensed hover fill>
+        <thead>
+          <tr>
+            <th>identifier</th>
+          </tr>
+        </thead>
+        <tbody>
+          {records}
+        </tbody>
+      </Table>
+    </Col>;
   }
 });
 
@@ -106,6 +145,23 @@ var Record = React.createClass({
   }
 });
 
+ReactDOM.render(
+  <Grid>
+    <Row>
+      <Col xs={12} md={12}>
+        <PageHeader className="oai-header">
+          <a href="http://www.clarin.eu/">
+            <img src="static/clarin-logo.png" style={{height: 98 + 'px'}}/>
+          </a>
+          OAI Viewer
+        </PageHeader>
+      </Col>
+    </Row>
+    <Row id="endpoints" />
+    <Row id="records" />
+  </Grid>,
+  document.getElementById('content')
+);
 ReactDOM.render(
   <Endpoints/>,
   document.getElementById('endpoints')

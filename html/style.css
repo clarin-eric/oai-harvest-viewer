@@ -1,0 +1,17 @@
+.oai-header {
+    margin: 0px;
+}
+
+.oai-header h1 {
+    margin: 0px;
+    border: none;
+}
+
+.section {
+    font-weight: bold;
+    font-size: larger;
+}
+
+.records .pagination {
+    margin: 0px;
+}

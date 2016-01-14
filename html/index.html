@@ -3,15 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <title>CLARIN OAI Viewer</title>
-    <script src="build/react.js"></script>
-    <script src="build/react-dom.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.6/react.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.6/react-dom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-bootstrap/0.28.2/react-bootstrap.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
   </head>
   <body>
-    <h1>CLARIN OAI viewer</h1>
-    <div id="endpoints"></div>
-    <div id="records"></div>
+    <div id="content"></div>
     <script src="oai.jsx" type="text/babel"></script>
   </body>
 </html>
