@@ -58,7 +58,7 @@ var Endpoints = React.createClass({
 
 var Endpoint = React.createClass({
   handleClick: function(me) {
-    $(this.getDOMNode()).addClass('highlight').siblings().removeClass('highlight');
+    $(ReactDOM.findDOMNode(this)).addClass('highlight').siblings().removeClass('highlight');
     ReactDOM.render(
       <Records endpoint={this.props.id} />,
       document.getElementById('_records')
@@ -167,7 +167,7 @@ var Records = React.createClass({
 
 var Record = React.createClass({
   handleClick: function(me) {
-    $(this.getDOMNode()).addClass('highlight').siblings().removeClass('highlight');
+    $(ReactDOM.findDOMNode(this)).addClass('highlight').siblings().removeClass('highlight');
   },  
   render: function() {
     return <tr onClick={this.handleClick}>
