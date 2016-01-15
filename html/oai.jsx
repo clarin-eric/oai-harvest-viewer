@@ -1,6 +1,7 @@
 // OAI DreamFactory API
 var base = "http://192.168.99.100/api/v2/oai/_table/";
-var key = "49b6352d3f5999db313bb4bf6d8a5980800b7264c8f8c23ffe432061ed0bb19d"
+var key = "49b6352d3f5999db313bb4bf6d8a5980800b7264c8f8c23ffe432061ed0bb19d";
+var pagesize = 1000;
 
 // react-bootstrap imports
 var PageHeader = ReactBootstrap.PageHeader;
@@ -56,8 +57,8 @@ var Endpoints = React.createClass({
 });
 
 var Endpoint = React.createClass({
-  handleClick: function() {
-   // ReactDOM.unmountComponentAtNode(document.getElementById('records'));
+  handleClick: function(me) {
+    $(this.getDOMNode()).addClass('highlight').siblings().removeClass('highlight');
     ReactDOM.render(
       <Records endpoint={this.props.id} />,
       document.getElementById('records')
@@ -72,15 +73,24 @@ var Endpoint = React.createClass({
 
 var Records = React.createClass({
   getInitialState: function() {
-    return {data: []};
+    return {data: [], meta: {count:0}, page:1, endpoint:0, filter:""};
   },
-  loadRecords: function(endpoint) {
+  loadRecords: function(endpoint,page,filter) {
+    if (page == null)
+      page = 1;
+    if (filter == null)
+      filter = this.state.filter;
+    var offset = (page - 1) * pagesize;
+    this.state.endpoint = endpoint;
+    var f = "";
+    if (filter != "")
+      f = " AND identifier LIKE '%"+filter.replace(/'/g,"''")+"%'";
     $.ajax({
-      url: base + "endpoint_record?" + $.param({include_count:true, filter:"endpoint="+endpoint+" AND metadataPrefix='cmdi'", api_key:key}),
+    url: base + "endpoint_record?" + $.param({offset:offset, include_count:true, filter:"endpoint="+endpoint+" AND metadataPrefix='cmdi'"+f, api_key:key}),
       dataType: 'json',
       cache: false,
       success: function(data) {
-        this.setState({data: data.resource});
+        this.setState({data:data.resource, meta:data.meta, page:page, endpoint:endpoint, filter:filter});
       }.bind(this),
       error: function(xhr, status, err) {
         console.error(this.props.url, status, err.toString());
@@ -95,22 +105,35 @@ var Records = React.createClass({
   componentWillReceiveProps: function (nextProps) {
     var endpoint = nextProps.endpoint;
     if (endpoint)
-      this.loadRecords(endpoint);
+      this.loadRecords(endpoint,1,'');
+  },
+  handleSelect: function (event, selectedEvent) {
+    var page = selectedEvent.eventKey;
+    this.loadRecords(this.state.endpoint,page);
+  },
+  handleFilter: function () {
+    this.loadRecords(this.state.endpoint,1,this.refs.filter.getValue());
+  },
+  handleChange: function() {
+    this.setState({filter:this.refs.filter.getValue()});
   },
   render: function() {
+    var filter = this.state.filter;
+    var page = this.state.page;
+    var pages = Math.ceil(this.state.meta.count / pagesize);
     var records = this.state.data.map(function(record) {
       return (
         <Record id={record.id} identifier={record.identifier}/>
       );
     });
-    var filter = <Button>
+    var glyph = <Button onClick={this.handleFilter}>
       <Glyphicon glyph="filter" />
     </Button>;
-          return <Col  xs={12} md={12} className="records" fill>
+    return <Col xs={12} md={12} className="records" fill>
       <Panel fill>
         <span className="section col-xs-4">Records</span>
         <span className="col-xs-3">
-          <Input className="filter" type="text" buttonAfter={filter} />
+          <Input ref="filter" className="filter" type="text" hasFeedback placeholder="Enter record filter" value={filter} buttonAfter={glyph} onChange={this.handleChange}/>
         </span>
         <span className="col-xs-5">
           <Pagination className="pagination" 
@@ -119,8 +142,11 @@ var Records = React.createClass({
             first
             last
             ellipsis
-            items={20}
-            maxButtons={5} />
+            items={pages}
+            maxButtons={5}
+            activePage={page}
+            onSelect={this.handleSelect}
+          />
         </span>
       </Panel>
       <Table striped bordered condensed hover fill>
@@ -138,8 +164,11 @@ var Records = React.createClass({
 });
 
 var Record = React.createClass({
+  handleClick: function(me) {
+    $(this.getDOMNode()).addClass('highlight').siblings().removeClass('highlight');
+  },  
   render: function() {
-    return <tr>
+    return <tr onClick={this.handleClick}>
       <td>{this.props.identifier}</td>
     </tr>
   }

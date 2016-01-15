@@ -15,3 +15,5 @@
 .records .pagination {
     margin: 0px;
 }
+
+.table-striped tbody tr.highlight td { background-color: #337AB7; color: #fff; }
