@@ -61,7 +61,7 @@ var Endpoint = React.createClass({
     $(this.getDOMNode()).addClass('highlight').siblings().removeClass('highlight');
     ReactDOM.render(
       <Records endpoint={this.props.id} />,
-      document.getElementById('records')
+      document.getElementById('_records')
     );
   },
   render: function() {
@@ -76,6 +76,7 @@ var Records = React.createClass({
     return {data: [], meta: {count:0}, page:1, endpoint:0, filter:""};
   },
   loadRecords: function(endpoint,page,filter) {
+    $("#records .highlight").removeClass("highlight");
     if (page == null)
       page = 1;
     if (filter == null)
@@ -104,8 +105,9 @@ var Records = React.createClass({
   },
   componentWillReceiveProps: function (nextProps) {
     var endpoint = nextProps.endpoint;
-    if (endpoint)
+    if (endpoint) {
       this.loadRecords(endpoint,1,'');
+    }
   },
   handleSelect: function (event, selectedEvent) {
     var page = selectedEvent.eventKey;
@@ -149,7 +151,7 @@ var Records = React.createClass({
           />
         </span>
       </Panel>
-      <Table striped bordered condensed hover fill>
+      <Table id="records" striped bordered condensed hover fill>
         <thead>
           <tr>
             <th>identifier</th>
@@ -186,16 +188,16 @@ ReactDOM.render(
         </PageHeader>
       </Col>
     </Row>
-    <Row id="endpoints" />
-    <Row id="records" />
+    <Row id="_endpoints" />
+    <Row id="_records" />
   </Grid>,
-  document.getElementById('content')
+  document.getElementById('_content')
 );
 ReactDOM.render(
   <Endpoints/>,
-  document.getElementById('endpoints')
+  document.getElementById('_endpoints')
 );
 ReactDOM.render(
   <Records/>,
-  document.getElementById('records')
+  document.getElementById('_records')
 );
