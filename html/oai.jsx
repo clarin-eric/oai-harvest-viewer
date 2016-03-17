@@ -1,6 +1,6 @@
 // OAI DreamFactory API
 var base = "http://192.168.99.100/api/v2/oai/_table/";
-var key = "49b6352d3f5999db313bb4bf6d8a5980800b7264c8f8c23ffe432061ed0bb19d";
+var key = "2fbd6a06b150c7a29c03920c9308116232aed931c66f5ebe1d6fbad7e11d891c";
 var pagesize = 1000;
 
 // react-bootstrap imports
@@ -38,21 +38,32 @@ var Endpoints = React.createClass({
         <Endpoint id={endpoint.id} name={endpoint.name}/>
       );
     });
-    return <Col xs={12} md={12} className="endpoints" fill>
-      <Panel fill>
-        <span className="section col-xs-4">Endpoints</span>
-      </Panel>
-      <Table striped bordered condensed hover fill>
-        <thead>
-          <tr>
-            <th>name</th>
-          </tr>
-        </thead>
-        <tbody>
-          {endpoints}
-        </tbody>
-      </Table>
-    </Col>;
+    return <div>
+      <Row>
+        <Col xs={12} md={12} className="endpointsHeader">
+          <Panel fill>
+            <span className="section col-xs-4">Endpoints</span>
+          </Panel>
+        </Col>
+      </Row>
+      <Row>      
+        <Col xs={8} md={8} className="endpoints" fill>
+          <Table striped bordered condensed hover fill>
+            <thead>
+              <tr>
+                <th>name</th>
+             </tr>
+            </thead>
+            <tbody>
+              {endpoints}
+            </tbody>
+          </Table>
+        </Col>
+        <Col xs={4} md={4} className="endpointInfo" fill>
+          <Panel header="Endpoint Info" />
+        </Col>
+      </Row>
+    </div>;
   }
 });
 
@@ -85,9 +96,9 @@ var Records = React.createClass({
     this.state.endpoint = endpoint;
     var f = "";
     if (filter != "")
-      f = " AND identifier LIKE '%"+filter.replace(/'/g,"''")+"%'";
+      f = " AND (identifier LIKE '%"+filter.replace(/'/g,"''")+"%')";
     $.ajax({
-    url: base + "endpoint_record?" + $.param({offset:offset, include_count:true, filter:"endpoint="+endpoint+" AND metadataPrefix='cmdi'"+f, api_key:key}),
+    url: base + "endpoint_record?" + $.param({offset:offset, include_count:true, filter:"(metadataPrefix='cmdi') AND (endpoint="+endpoint+")"+f , api_key:key}),
       dataType: 'json',
       cache: false,
       success: function(data) {
@@ -131,37 +142,48 @@ var Records = React.createClass({
     var glyph = <Button onClick={this.handleFilter}>
       <Glyphicon glyph="filter" />
     </Button>;
-    return <Col xs={12} md={12} className="records" fill>
-      <Panel fill>
-        <span className="section col-xs-4">Records</span>
-        <span className="col-xs-3">
-          <Input ref="filter" className="filter" type="text" hasFeedback placeholder="Enter record filter" value={filter} buttonAfter={glyph} onChange={this.handleChange}/>
-        </span>
-        <span className="col-xs-5">
-          <Pagination className="pagination" 
-            prev
-            next
-            first
-            last
-            ellipsis
-            items={pages}
-            maxButtons={5}
-            activePage={page}
-            onSelect={this.handleSelect}
-          />
-        </span>
-      </Panel>
-      <Table id="records" striped bordered condensed hover fill>
-        <thead>
-          <tr>
-            <th>identifier</th>
-          </tr>
-        </thead>
-        <tbody>
-          {records}
-        </tbody>
-      </Table>
-    </Col>;
+    return <div>
+      <Row>
+        <Col xs={12} md={12} className="recordsHeader" fill>
+          <Panel fill>
+            <span className="section col-xs-4">Records</span>
+            <span className="col-xs-4">
+              <Input ref="filter" className="filter" type="text" hasFeedback placeholder="Enter record filter" value={filter} buttonAfter={glyph} onChange={this.handleChange}/>
+            </span>
+            <span className="col-xs-4">
+              <Pagination className="pagination" 
+                prev
+                next
+                first
+                last
+                ellipsis
+                items={pages}
+                maxButtons={5}
+                activePage={page}
+                onSelect={this.handleSelect}
+              />
+            </span>
+          </Panel>
+        </Col>
+      </Row>
+      <Row>
+        <Col xs={8} md={8} className="records" fill>
+          <Table id="records" striped bordered condensed hover fill>
+            <thead>
+              <tr>
+                <th>identifier</th>
+              </tr>
+            </thead>
+            <tbody>
+              {records}
+            </tbody>
+          </Table>
+        </Col>
+        <Col xs={4} md={4} className="recordInfo" fill>
+          <Panel header="Record Info" />
+        </Col>
+      </Row>
+    </div>;
   }
 });
 
@@ -188,8 +210,8 @@ ReactDOM.render(
         </PageHeader>
       </Col>
     </Row>
-    <Row id="_endpoints" />
-    <Row id="_records" />
+    <div id="_endpoints" />
+    <div id="_records" />
   </Grid>,
   document.getElementById('_content')
 );
