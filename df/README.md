@@ -7,3 +7,5 @@ http://localhost/
 Login: admin@example.com:dreamAdmin
 
 ```php artisan dreamfactory:import-pkg /tmp/oai-app.zip```
+
+A new version of oai-app.zip can be created by POSTing fetch-package.json to the package service in the admin UI.

@@ -1,15 +1,15 @@
 {
-    "service":{
+	"service":{
 		"system":{
 			"role":{
-				"filter":"name like 'oai'",
-    		}
+				"filter":"name like 'oai'"
+    			},
 			"app":{
-				"filter":"name like 'OAI Viewer'",
-    		}
+				"filter":"name like 'OAI Viewer'"
+    			},
 			"service":{
-				"filter":"name like 'oai'",
-    		}
+				"filter":"name like 'oai'"
+    			}
 		}
 	}
 }
