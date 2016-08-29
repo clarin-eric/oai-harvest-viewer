@@ -1,6 +1,6 @@
 // OAI DreamFactory API
-var base = "http://192.168.99.100/api/v2/oai/_table/";
-var key = "2fbd6a06b150c7a29c03920c9308116232aed931c66f5ebe1d6fbad7e11d891c";
+var base = "http://localhost/api/v2/oai/_table/";
+var key = "3ab39f1dbfff0a6313a9dbfc60afc27543fc802398957f69eb86d7efebb03a67";
 var pagesize = 1000;
 
 // react-bootstrap imports
