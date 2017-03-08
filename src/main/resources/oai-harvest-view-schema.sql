@@ -1,20 +1,23 @@
-﻿--
+--
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.4.5
--- Dumped by pg_dump version 9.4.0
--- Started on 2015-11-27 19:42:28 CET
+-- Dumped from database version 9.6.2
+-- Dumped by pg_dump version 9.6.2
+
+-- Started on 2017-03-08 13:08:44 CET
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
+SET row_security = off;
 
 --
--- TOC entry 182 (class 3079 OID 12123)
+-- TOC entry 1 (class 3079 OID 12655)
 -- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
 --
 
@@ -22,8 +25,8 @@ CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 
 
 --
--- TOC entry 2326 (class 0 OID 0)
--- Dependencies: 182
+-- TOC entry 2463 (class 0 OID 0)
+-- Dependencies: 1
 -- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
 --
 
@@ -33,8 +36,8 @@ COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 SET search_path = public, pg_catalog;
 
 --
--- TOC entry 195 (class 1255 OID 19044)
--- Name: insert_endpoint(character varying); Type: FUNCTION; Schema: public; Owner: menzowi
+-- TOC entry 197 (class 1255 OID 16610)
+-- Name: insert_endpoint(character varying); Type: FUNCTION; Schema: public; Owner: oai
 --
 
 CREATE FUNCTION insert_endpoint(name character varying) RETURNS void
@@ -51,15 +54,15 @@ END;
 $$;
 
 
-ALTER FUNCTION public.insert_endpoint(name character varying) OWNER TO menzowi;
+ALTER FUNCTION public.insert_endpoint(name character varying) OWNER TO oai;
 
 SET default_tablespace = '';
 
 SET default_with_oids = false;
 
 --
--- TOC entry 172 (class 1259 OID 19045)
--- Name: endpoint; Type: TABLE; Schema: public; Owner: menzowi; Tablespace: 
+-- TOC entry 185 (class 1259 OID 16611)
+-- Name: endpoint; Type: TABLE; Schema: public; Owner: oai
 --
 
 CREATE TABLE endpoint (
@@ -68,14 +71,14 @@ CREATE TABLE endpoint (
 );
 
 
-ALTER TABLE endpoint OWNER TO menzowi;
+ALTER TABLE endpoint OWNER TO oai;
 
 --
--- TOC entry 173 (class 1259 OID 19051)
--- Name: endpoint_harvest; Type: TABLE; Schema: public; Owner: menzowi; Tablespace: 
+-- TOC entry 186 (class 1259 OID 16617)
+-- Name: endpoint_harvest; Type: TABLE; Schema: public; Owner: oai
 --
 
-CREATE TABLE "endpoint_harvest" (
+CREATE TABLE endpoint_harvest (
     id integer NOT NULL,
     location text,
     harvest integer,
@@ -83,14 +86,14 @@ CREATE TABLE "endpoint_harvest" (
 );
 
 
-ALTER TABLE "endpoint_harvest" OWNER TO menzowi;
+ALTER TABLE endpoint_harvest OWNER TO oai;
 
 --
--- TOC entry 174 (class 1259 OID 19057)
--- Name: endpoint_harvest_id_seq; Type: SEQUENCE; Schema: public; Owner: menzowi
+-- TOC entry 187 (class 1259 OID 16623)
+-- Name: endpoint_harvest_id_seq; Type: SEQUENCE; Schema: public; Owner: oai
 --
 
-CREATE SEQUENCE "endpoint_harvest_id_seq"
+CREATE SEQUENCE endpoint_harvest_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -98,20 +101,20 @@ CREATE SEQUENCE "endpoint_harvest_id_seq"
     CACHE 1;
 
 
-ALTER TABLE "endpoint_harvest_id_seq" OWNER TO menzowi;
+ALTER TABLE endpoint_harvest_id_seq OWNER TO oai;
 
 --
--- TOC entry 2327 (class 0 OID 0)
--- Dependencies: 174
--- Name: endpoint_harvest_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: menzowi
+-- TOC entry 2464 (class 0 OID 0)
+-- Dependencies: 187
+-- Name: endpoint_harvest_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: oai
 --
 
-ALTER SEQUENCE "endpoint_harvest_id_seq" OWNED BY "endpoint_harvest".id;
+ALTER SEQUENCE endpoint_harvest_id_seq OWNED BY endpoint_harvest.id;
 
 
 --
--- TOC entry 175 (class 1259 OID 19059)
--- Name: endpoint_id_seq; Type: SEQUENCE; Schema: public; Owner: menzowi
+-- TOC entry 188 (class 1259 OID 16625)
+-- Name: endpoint_id_seq; Type: SEQUENCE; Schema: public; Owner: oai
 --
 
 CREATE SEQUENCE endpoint_id_seq
@@ -122,20 +125,20 @@ CREATE SEQUENCE endpoint_id_seq
     CACHE 1;
 
 
-ALTER TABLE endpoint_id_seq OWNER TO menzowi;
+ALTER TABLE endpoint_id_seq OWNER TO oai;
 
 --
--- TOC entry 2328 (class 0 OID 0)
--- Dependencies: 175
--- Name: endpoint_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: menzowi
+-- TOC entry 2465 (class 0 OID 0)
+-- Dependencies: 188
+-- Name: endpoint_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: oai
 --
 
 ALTER SEQUENCE endpoint_id_seq OWNED BY endpoint.id;
 
 
 --
--- TOC entry 176 (class 1259 OID 19061)
--- Name: harvest; Type: TABLE; Schema: public; Owner: menzowi; Tablespace: 
+-- TOC entry 189 (class 1259 OID 16627)
+-- Name: harvest; Type: TABLE; Schema: public; Owner: oai
 --
 
 CREATE TABLE harvest (
@@ -145,35 +148,11 @@ CREATE TABLE harvest (
 );
 
 
-ALTER TABLE harvest OWNER TO menzowi;
+ALTER TABLE harvest OWNER TO oai;
 
 --
--- TOC entry 177 (class 1259 OID 19068)
--- Name: harvest_id_seq; Type: SEQUENCE; Schema: public; Owner: menzowi
---
-
-CREATE SEQUENCE harvest_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE harvest_id_seq OWNER TO menzowi;
-
---
--- TOC entry 2329 (class 0 OID 0)
--- Dependencies: 177
--- Name: harvest_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: menzowi
---
-
-ALTER SEQUENCE harvest_id_seq OWNED BY harvest.id;
-
-
---
--- TOC entry 178 (class 1259 OID 19070)
--- Name: record; Type: TABLE; Schema: public; Owner: menzowi; Tablespace: 
+-- TOC entry 191 (class 1259 OID 16636)
+-- Name: record; Type: TABLE; Schema: public; Owner: oai
 --
 
 CREATE TABLE record (
@@ -185,11 +164,96 @@ CREATE TABLE record (
 );
 
 
-ALTER TABLE record OWNER TO menzowi;
+ALTER TABLE record OWNER TO oai;
 
 --
--- TOC entry 179 (class 1259 OID 19076)
--- Name: record_id_seq; Type: SEQUENCE; Schema: public; Owner: menzowi
+-- TOC entry 193 (class 1259 OID 16644)
+-- Name: request; Type: TABLE; Schema: public; Owner: oai
+--
+
+CREATE TABLE request (
+    id integer NOT NULL,
+    endpoint_harvest integer,
+    location text
+);
+
+
+ALTER TABLE request OWNER TO oai;
+
+--
+-- TOC entry 196 (class 1259 OID 16711)
+-- Name: endpoint_info; Type: VIEW; Schema: public; Owner: menzowi
+--
+
+CREATE VIEW endpoint_info AS
+ SELECT endpoint.id,
+    COALESCE(requests.count, (0)::bigint) AS requests,
+    COALESCE(records.count, (0)::bigint) AS records,
+    harvest."when"
+   FROM ((((endpoint
+     JOIN endpoint_harvest ON ((endpoint.id = endpoint_harvest.endpoint)))
+     JOIN harvest ON ((harvest.id = endpoint_harvest.harvest)))
+     LEFT JOIN ( SELECT request.endpoint_harvest,
+            count(*) AS count
+           FROM request
+          GROUP BY request.endpoint_harvest) requests ON ((endpoint_harvest.id = requests.endpoint_harvest)))
+     LEFT JOIN ( SELECT request.endpoint_harvest,
+            count(*) AS count
+           FROM (request
+             JOIN record ON ((request.id = record.request)))
+          GROUP BY request.endpoint_harvest) records ON ((endpoint_harvest.id = records.endpoint_harvest)))
+  ORDER BY harvest."when" DESC;
+
+
+ALTER TABLE endpoint_info OWNER TO menzowi;
+
+--
+-- TOC entry 195 (class 1259 OID 16700)
+-- Name: endpoint_record; Type: VIEW; Schema: public; Owner: oai
+--
+
+CREATE VIEW endpoint_record WITH (security_barrier='false') AS
+ SELECT record.id,
+    record.identifier,
+    record."metadataPrefix",
+    record.location,
+    record.request,
+    endpoint_harvest.endpoint,
+    endpoint_harvest.harvest
+   FROM ((record
+     JOIN request ON ((record.request = request.id)))
+     JOIN endpoint_harvest ON ((request.endpoint_harvest = endpoint_harvest.id)));
+
+
+ALTER TABLE endpoint_record OWNER TO oai;
+
+--
+-- TOC entry 190 (class 1259 OID 16634)
+-- Name: harvest_id_seq; Type: SEQUENCE; Schema: public; Owner: oai
+--
+
+CREATE SEQUENCE harvest_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE harvest_id_seq OWNER TO oai;
+
+--
+-- TOC entry 2466 (class 0 OID 0)
+-- Dependencies: 190
+-- Name: harvest_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: oai
+--
+
+ALTER SEQUENCE harvest_id_seq OWNED BY harvest.id;
+
+
+--
+-- TOC entry 192 (class 1259 OID 16642)
+-- Name: record_id_seq; Type: SEQUENCE; Schema: public; Owner: oai
 --
 
 CREATE SEQUENCE record_id_seq
@@ -200,34 +264,20 @@ CREATE SEQUENCE record_id_seq
     CACHE 1;
 
 
-ALTER TABLE record_id_seq OWNER TO menzowi;
+ALTER TABLE record_id_seq OWNER TO oai;
 
 --
--- TOC entry 2330 (class 0 OID 0)
--- Dependencies: 179
--- Name: record_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: menzowi
+-- TOC entry 2467 (class 0 OID 0)
+-- Dependencies: 192
+-- Name: record_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: oai
 --
 
 ALTER SEQUENCE record_id_seq OWNED BY record.id;
 
 
 --
--- TOC entry 180 (class 1259 OID 19078)
--- Name: request; Type: TABLE; Schema: public; Owner: menzowi; Tablespace: 
---
-
-CREATE TABLE request (
-    id integer NOT NULL,
-    "endpoint_harvest" integer,
-    location text
-);
-
-
-ALTER TABLE request OWNER TO menzowi;
-
---
--- TOC entry 181 (class 1259 OID 19084)
--- Name: request_id_seq; Type: SEQUENCE; Schema: public; Owner: menzowi
+-- TOC entry 194 (class 1259 OID 16650)
+-- Name: request_id_seq; Type: SEQUENCE; Schema: public; Owner: oai
 --
 
 CREATE SEQUENCE request_id_seq
@@ -238,60 +288,60 @@ CREATE SEQUENCE request_id_seq
     CACHE 1;
 
 
-ALTER TABLE request_id_seq OWNER TO menzowi;
+ALTER TABLE request_id_seq OWNER TO oai;
 
 --
--- TOC entry 2331 (class 0 OID 0)
--- Dependencies: 181
--- Name: request_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: menzowi
+-- TOC entry 2468 (class 0 OID 0)
+-- Dependencies: 194
+-- Name: request_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: oai
 --
 
 ALTER SEQUENCE request_id_seq OWNED BY request.id;
 
 
 --
--- TOC entry 2177 (class 2604 OID 19086)
--- Name: id; Type: DEFAULT; Schema: public; Owner: menzowi
+-- TOC entry 2305 (class 2604 OID 16652)
+-- Name: endpoint id; Type: DEFAULT; Schema: public; Owner: oai
 --
 
 ALTER TABLE ONLY endpoint ALTER COLUMN id SET DEFAULT nextval('endpoint_id_seq'::regclass);
 
 
 --
--- TOC entry 2178 (class 2604 OID 19087)
--- Name: id; Type: DEFAULT; Schema: public; Owner: menzowi
+-- TOC entry 2306 (class 2604 OID 16653)
+-- Name: endpoint_harvest id; Type: DEFAULT; Schema: public; Owner: oai
 --
 
-ALTER TABLE ONLY "endpoint_harvest" ALTER COLUMN id SET DEFAULT nextval('"endpoint_harvest_id_seq"'::regclass);
+ALTER TABLE ONLY endpoint_harvest ALTER COLUMN id SET DEFAULT nextval('endpoint_harvest_id_seq'::regclass);
 
 
 --
--- TOC entry 2180 (class 2604 OID 19088)
--- Name: id; Type: DEFAULT; Schema: public; Owner: menzowi
+-- TOC entry 2308 (class 2604 OID 16654)
+-- Name: harvest id; Type: DEFAULT; Schema: public; Owner: oai
 --
 
 ALTER TABLE ONLY harvest ALTER COLUMN id SET DEFAULT nextval('harvest_id_seq'::regclass);
 
 
 --
--- TOC entry 2181 (class 2604 OID 19089)
--- Name: id; Type: DEFAULT; Schema: public; Owner: menzowi
+-- TOC entry 2309 (class 2604 OID 16655)
+-- Name: record id; Type: DEFAULT; Schema: public; Owner: oai
 --
 
 ALTER TABLE ONLY record ALTER COLUMN id SET DEFAULT nextval('record_id_seq'::regclass);
 
 
 --
--- TOC entry 2182 (class 2604 OID 19090)
--- Name: id; Type: DEFAULT; Schema: public; Owner: menzowi
+-- TOC entry 2310 (class 2604 OID 16656)
+-- Name: request id; Type: DEFAULT; Schema: public; Owner: oai
 --
 
 ALTER TABLE ONLY request ALTER COLUMN id SET DEFAULT nextval('request_id_seq'::regclass);
 
 
 --
--- TOC entry 2193 (class 2606 OID 19092)
--- Name: harvest_key; Type: CONSTRAINT; Schema: public; Owner: menzowi; Tablespace: 
+-- TOC entry 2321 (class 2606 OID 16658)
+-- Name: harvest harvest_key; Type: CONSTRAINT; Schema: public; Owner: oai
 --
 
 ALTER TABLE ONLY harvest
@@ -299,8 +349,8 @@ ALTER TABLE ONLY harvest
 
 
 --
--- TOC entry 2184 (class 2606 OID 19094)
--- Name: key_endpoint; Type: CONSTRAINT; Schema: public; Owner: menzowi; Tablespace: 
+-- TOC entry 2312 (class 2606 OID 16660)
+-- Name: endpoint key_endpoint; Type: CONSTRAINT; Schema: public; Owner: oai
 --
 
 ALTER TABLE ONLY endpoint
@@ -308,17 +358,17 @@ ALTER TABLE ONLY endpoint
 
 
 --
--- TOC entry 2189 (class 2606 OID 19096)
--- Name: key_endpoint_harvest; Type: CONSTRAINT; Schema: public; Owner: menzowi; Tablespace: 
+-- TOC entry 2317 (class 2606 OID 16662)
+-- Name: endpoint_harvest key_endpoint_harvest; Type: CONSTRAINT; Schema: public; Owner: oai
 --
 
-ALTER TABLE ONLY "endpoint_harvest"
-    ADD CONSTRAINT "key_endpoint_harvest" PRIMARY KEY (id);
+ALTER TABLE ONLY endpoint_harvest
+    ADD CONSTRAINT key_endpoint_harvest PRIMARY KEY (id);
 
 
 --
--- TOC entry 2197 (class 2606 OID 19098)
--- Name: key_record; Type: CONSTRAINT; Schema: public; Owner: menzowi; Tablespace: 
+-- TOC entry 2325 (class 2606 OID 16664)
+-- Name: record key_record; Type: CONSTRAINT; Schema: public; Owner: oai
 --
 
 ALTER TABLE ONLY record
@@ -326,8 +376,8 @@ ALTER TABLE ONLY record
 
 
 --
--- TOC entry 2203 (class 2606 OID 19100)
--- Name: key_request; Type: CONSTRAINT; Schema: public; Owner: menzowi; Tablespace: 
+-- TOC entry 2331 (class 2606 OID 16666)
+-- Name: request key_request; Type: CONSTRAINT; Schema: public; Owner: oai
 --
 
 ALTER TABLE ONLY request
@@ -335,17 +385,17 @@ ALTER TABLE ONLY request
 
 
 --
--- TOC entry 2191 (class 2606 OID 19102)
--- Name: unique_endpoint_harvest; Type: CONSTRAINT; Schema: public; Owner: menzowi; Tablespace: 
+-- TOC entry 2319 (class 2606 OID 16668)
+-- Name: endpoint_harvest unique_endpoint_harvest; Type: CONSTRAINT; Schema: public; Owner: oai
 --
 
-ALTER TABLE ONLY "endpoint_harvest"
-    ADD CONSTRAINT "unique_endpoint_harvest" UNIQUE (harvest, location);
+ALTER TABLE ONLY endpoint_harvest
+    ADD CONSTRAINT unique_endpoint_harvest UNIQUE (harvest, location);
 
 
 --
--- TOC entry 2186 (class 2606 OID 19133)
--- Name: unique_endpoint_name; Type: CONSTRAINT; Schema: public; Owner: menzowi; Tablespace: 
+-- TOC entry 2314 (class 2606 OID 16670)
+-- Name: endpoint unique_endpoint_name; Type: CONSTRAINT; Schema: public; Owner: oai
 --
 
 ALTER TABLE ONLY endpoint
@@ -353,8 +403,8 @@ ALTER TABLE ONLY endpoint
 
 
 --
--- TOC entry 2199 (class 2606 OID 19104)
--- Name: unique_identifier; Type: CONSTRAINT; Schema: public; Owner: menzowi; Tablespace: 
+-- TOC entry 2327 (class 2606 OID 16672)
+-- Name: record unique_identifier; Type: CONSTRAINT; Schema: public; Owner: oai
 --
 
 ALTER TABLE ONLY record
@@ -362,8 +412,8 @@ ALTER TABLE ONLY record
 
 
 --
--- TOC entry 2195 (class 2606 OID 19106)
--- Name: unique_location; Type: CONSTRAINT; Schema: public; Owner: menzowi; Tablespace: 
+-- TOC entry 2323 (class 2606 OID 16674)
+-- Name: harvest unique_location; Type: CONSTRAINT; Schema: public; Owner: oai
 --
 
 ALTER TABLE ONLY harvest
@@ -371,8 +421,8 @@ ALTER TABLE ONLY harvest
 
 
 --
--- TOC entry 2201 (class 2606 OID 19108)
--- Name: unique_record_location; Type: CONSTRAINT; Schema: public; Owner: menzowi; Tablespace: 
+-- TOC entry 2329 (class 2606 OID 16676)
+-- Name: record unique_record_location; Type: CONSTRAINT; Schema: public; Owner: oai
 --
 
 ALTER TABLE ONLY record
@@ -380,43 +430,43 @@ ALTER TABLE ONLY record
 
 
 --
--- TOC entry 2205 (class 2606 OID 19110)
--- Name: unique_request; Type: CONSTRAINT; Schema: public; Owner: menzowi; Tablespace: 
+-- TOC entry 2333 (class 2606 OID 16678)
+-- Name: request unique_request; Type: CONSTRAINT; Schema: public; Owner: oai
 --
 
 ALTER TABLE ONLY request
-    ADD CONSTRAINT unique_request UNIQUE ("endpoint_harvest", location);
+    ADD CONSTRAINT unique_request UNIQUE (endpoint_harvest, location);
 
 
 --
--- TOC entry 2187 (class 1259 OID 19111)
--- Name: fki_endpoint_harvest_endpoint; Type: INDEX; Schema: public; Owner: menzowi; Tablespace: 
+-- TOC entry 2315 (class 1259 OID 16679)
+-- Name: fki_endpoint_harvest_endpoint; Type: INDEX; Schema: public; Owner: oai
 --
 
-CREATE INDEX "fki_endpoint_harvest_endpoint" ON "endpoint_harvest" USING btree (endpoint);
-
-
---
--- TOC entry 2206 (class 2606 OID 19112)
--- Name: endpoint_harvest_endpoint; Type: FK CONSTRAINT; Schema: public; Owner: menzowi
---
-
-ALTER TABLE ONLY "endpoint_harvest"
-    ADD CONSTRAINT "endpoint_harvest_endpoint" FOREIGN KEY (endpoint) REFERENCES endpoint(id) ON UPDATE CASCADE ON DELETE CASCADE;
+CREATE INDEX fki_endpoint_harvest_endpoint ON endpoint_harvest USING btree (endpoint);
 
 
 --
--- TOC entry 2207 (class 2606 OID 19117)
--- Name: endpoint_harvest_harvest; Type: FK CONSTRAINT; Schema: public; Owner: menzowi
+-- TOC entry 2334 (class 2606 OID 16680)
+-- Name: endpoint_harvest endpoint_harvest_endpoint; Type: FK CONSTRAINT; Schema: public; Owner: oai
 --
 
-ALTER TABLE ONLY "endpoint_harvest"
-    ADD CONSTRAINT "endpoint_harvest_harvest" FOREIGN KEY (harvest) REFERENCES harvest(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY endpoint_harvest
+    ADD CONSTRAINT endpoint_harvest_endpoint FOREIGN KEY (endpoint) REFERENCES endpoint(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- TOC entry 2208 (class 2606 OID 19122)
--- Name: record_request; Type: FK CONSTRAINT; Schema: public; Owner: menzowi
+-- TOC entry 2335 (class 2606 OID 16685)
+-- Name: endpoint_harvest endpoint_harvest_harvest; Type: FK CONSTRAINT; Schema: public; Owner: oai
+--
+
+ALTER TABLE ONLY endpoint_harvest
+    ADD CONSTRAINT endpoint_harvest_harvest FOREIGN KEY (harvest) REFERENCES harvest(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 2336 (class 2606 OID 16690)
+-- Name: record record_request; Type: FK CONSTRAINT; Schema: public; Owner: oai
 --
 
 ALTER TABLE ONLY record
@@ -424,45 +474,17 @@ ALTER TABLE ONLY record
 
 
 --
--- TOC entry 2209 (class 2606 OID 19127)
--- Name: request_endpoint_harvest; Type: FK CONSTRAINT; Schema: public; Owner: menzowi
+-- TOC entry 2337 (class 2606 OID 16695)
+-- Name: request request_endpoint_harvest; Type: FK CONSTRAINT; Schema: public; Owner: oai
 --
 
 ALTER TABLE ONLY request
-    ADD CONSTRAINT "request_endpoint_harvest" FOREIGN KEY ("endpoint_harvest") REFERENCES "endpoint_harvest"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT request_endpoint_harvest FOREIGN KEY (endpoint_harvest) REFERENCES endpoint_harvest(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
---
--- TOC entry 2325 (class 0 OID 0)
--- Dependencies: 6
--- Name: public; Type: ACL; Schema: -; Owner: menzowi
---
-
-REVOKE ALL ON SCHEMA public FROM PUBLIC;
-REVOKE ALL ON SCHEMA public FROM menzowi;
-GRANT ALL ON SCHEMA public TO menzowi;
-GRANT ALL ON SCHEMA public TO PUBLIC;
-
-
--- Completed on 2015-11-27 19:42:28 CET
+-- Completed on 2017-03-08 13:08:44 CET
 
 --
 -- PostgreSQL database dump complete
 --
 
-CREATE OR REPLACE VIEW
-	endpoint_record
-AS SELECT
-	record.*,
-	endpoint_harvest.endpoint
-FROM
-	record
-JOIN
-	request
-ON
-	record.request = request.id
-JOIN
-    endpoint_harvest
-ON
-    request.endpoint_harvest = endpoint_harvest.id;
-;

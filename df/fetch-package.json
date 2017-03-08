@@ -2,7 +2,7 @@
 	"service":{
 		"system":{
 			"role":{
-				"filter":"name like 'oai'"
+				"filter":"name like 'OAI Viewer'"
     			},
 			"app":{
 				"filter":"name like 'OAI Viewer'"

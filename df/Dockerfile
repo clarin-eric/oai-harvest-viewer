@@ -49,7 +49,8 @@ RUN a2enmod headers
 RUN a2enmod rewrite
 
 # get app src
-RUN git clone https://github.com/dreamfactorysoftware/dreamfactory.git /opt/dreamfactory
+RUN git clone -b 2.2.1 https://github.com/dreamfactorysoftware/dreamfactory.git /opt/dreamfactory
+#RUN git clone -b 2.4.2 https://github.com/dreamfactorysoftware/dreamfactory.git /opt/dreamfactory
 
 WORKDIR /opt/dreamfactory
 

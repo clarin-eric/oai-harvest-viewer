@@ -1,6 +1,6 @@
 // OAI DreamFactory API
 var base = "http://localhost/api/v2/oai/_table/";
-var key = "3ab39f1dbfff0a6313a9dbfc60afc27543fc802398957f69eb86d7efebb03a67";
+var key = "b4d819606353e94cecee7bfa389f32013a41c1017fcd97d29f06d4d3648efaa3";
 var pagesize = 1000;
 
 // react-bootstrap imports
@@ -60,7 +60,63 @@ var Endpoints = React.createClass({
           </Table>
         </Col>
         <Col xs={4} md={4} className="endpointInfo" fill>
-          <Panel header="Endpoint Info" />
+          <Panel header="Endpoint Info">
+            <div id="_endpointInfo">Select an Endpoint</div>
+          </Panel>
+        </Col>
+      </Row>
+    </div>;
+  }
+});
+
+var Endpoints = React.createClass({
+  getInitialState: function() {
+    return {data: []};
+  },
+  componentDidMount: function() {
+    $.ajax({
+      url: base + "endpoint?" + $.param({api_key:key}),
+      dataType: 'json',
+      cache: false,
+      success: function(data) {
+        this.setState({data: data.resource});
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(this.props.url, status, err.toString());
+      }.bind(this)
+    });
+  },
+  render: function() {
+    var endpoints = this.state.data.map(function(endpoint) {
+      return (
+        <Endpoint id={endpoint.id} name={endpoint.name}/>
+      );
+    });
+    return <div>
+      <Row>
+        <Col xs={12} md={12} className="endpointsHeader">
+          <Panel fill>
+            <span className="section col-xs-4">Endpoints</span>
+          </Panel>
+        </Col>
+      </Row>
+      <Row>      
+        <Col xs={8} md={8} className="endpoints" fill>
+          <Table striped bordered condensed hover fill>
+            <thead>
+              <tr>
+                <th>name</th>
+             </tr>
+            </thead>
+            <tbody>
+              {endpoints}
+            </tbody>
+          </Table>
+        </Col>
+        <Col xs={4} md={4} className="endpointInfo" fill>
+          <Panel header="Endpoint Info">
+            <div id="_endpointInfo">Select an Endpoint</div>
+          </Panel>
         </Col>
       </Row>
     </div>;
@@ -74,11 +130,61 @@ var Endpoint = React.createClass({
       <Records endpoint={this.props.id} />,
       document.getElementById('_records')
     );
+    ReactDOM.render(
+      <EndpointInfo endpoint={this.props.id} />,
+      document.getElementById('_endpointInfo')
+    );
   },
   render: function() {
     return <tr onClick={this.handleClick}>
       <td>{this.props.name}</td>
     </tr>
+  }
+});
+
+var EndpointInfo = React.createClass({
+  getInitialState: function() {
+    return {data: []};
+  },
+  loadInfo: function(endpoint) {
+    $.ajax({
+      url: base + "endpoint_info?" + $.param({api_key:key, filter:"id="+endpoint}),
+      dataType: 'json',
+      cache: false,
+      success: function(data) {
+        this.setState({data: data.resource[0]});
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(this.props.url, status, err.toString());
+      }.bind(this)
+    });
+  },
+  componentDidMount: function() {
+    var endpoint = this.props.endpoint;
+    if (endpoint)
+      this.loadInfo(endpoint);
+  },
+  componentWillReceiveProps: function (nextProps) {
+    var endpoint = nextProps.endpoint;
+    if (endpoint) {
+      this.loadInfo(endpoint);
+    }
+  },
+  render: function() {
+    return <div>
+      <div>
+        <span>records: </span>
+        <span>{this.state.data.records}</span>
+      </div>
+      <div>
+        <span>requests: </span>
+        <span>{this.state.data.requests}</span>
+      </div>
+      <div>
+        <span>when: </span>
+        <span>{this.state.data.when}</span>
+      </div>
+    </div>;
   }
 });
 
