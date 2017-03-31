@@ -17,14 +17,20 @@ public class Main {
         System.err.println("INF: oaiViewer <options> -- <DIR>?");
         System.err.println("INF: <DIR> harvest source directory (default: .)");
         System.err.println("INF: oaiViewer options:");
+        System.err.println("INF: -f <name> of the directory the formats (default: results)");
         System.err.println("INF: -o <FILE> overview file (optional)");
+        System.err.println("INF: -r <name> of the directory containing the OAI requests (default: oai-pmh)");
+        System.err.println("INF: -t <type> harvest type (default: clarin)");
     }
 
     public static void main(String[] args) {
         String dir = ".";
         String overview = null;
+        String type = "clarin";
+        String reqs = "oai-pmh";
+        String fmts = "results";
         // check command line
-        OptionParser parser = new OptionParser( "o:?*" );
+        OptionParser parser = new OptionParser( "f:o:r:t:?*" );
         OptionSet options = parser.parse(args);
         if (options.has("o")) {
             overview = (String)options.valueOf("o");
@@ -37,6 +43,15 @@ public class Main {
                 System.err.println("FTL: the overview file["+path.toAbsolutePath()+"] can't be read!");
                 System.exit(1);
             }
+        }
+        if (options.has("f")) {
+            fmts = (String)options.valueOf("f");
+        }
+        if (options.has("r")) {
+            reqs = (String)options.valueOf("r");
+        }
+        if (options.has("t")) {
+            type = (String)options.valueOf("t");
         }
         if (options.has("?")) {
             showHelp();
@@ -56,16 +71,16 @@ public class Main {
         // check if the expected directory structure exists:
         // $DIR/oai-pmh/<repo>/<oai-response>.xml
         // $DIR/results/<format>/<repo>/<oai-record>.xml
-        Path path = new TPath(dir+"/oai-pmh");
+        Path path = new TPath(dir+"/"+reqs);
         if (!Files.isDirectory(path)) {
-            System.err.println("FTL: the oai-pmh directory["+path.toAbsolutePath()+"] doesn't exist!");
+            System.err.println("FTL: the OAI requests directory["+path.toAbsolutePath()+"] doesn't exist!");
             System.exit(1);
         }
         if (!Files.isReadable(path)) {
-            System.err.println("FTL: the oai-pmh directory["+path.toAbsolutePath()+"] can't be read!");
+            System.err.println("FTL: the OAI requests directory["+path.toAbsolutePath()+"] can't be read!");
             System.exit(1);
         }
-        path = new TPath(dir+"/results");
+        path = new TPath(dir+"/"+fmts);
         if (!Files.isDirectory(path)) {
             System.err.println("FTL: the results directory["+path.toAbsolutePath()+"] doesn't exist!");
             System.exit(1);
@@ -77,6 +92,9 @@ public class Main {
         
         // harvest info
         Harvest harvest = new Harvest(Paths.get(dir));
+        harvest.setFormatsDirName(fmts);
+        harvest.setRequestDirName(reqs);
+        harvest.setType(type);
         if (overview!=null)
             harvest.setOverview(new TPath(overview));
         harvest.crawl();

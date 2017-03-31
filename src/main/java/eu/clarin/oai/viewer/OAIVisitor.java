@@ -18,12 +18,29 @@ import java.nio.file.attribute.BasicFileAttributes;
  */
 public class OAIVisitor extends SimpleFileVisitor<Path> {
     
+    protected String reqsDirName = "oai-pmh";
     protected Harvest harvest = null;
     
     public OAIVisitor(Harvest harvest) {
         this.harvest = harvest;
     }
     
+    public void setRequestsDirName(String reqsDirName) {
+        this.reqsDirName = reqsDirName;
+    }
+    
+    @Override
+    public FileVisitResult preVisitDirectory(Path dir,BasicFileAttributes attr) {
+        System.err.format("-- OAI Endpoint: %s%n", dir);
+        Path loc = harvest.getDirectory().relativize(dir);
+        Path name = dir.getName(dir.getNameCount()-1);
+        if (!name.toString().equals(this.reqsDirName)) {
+            System.out.format("SELECT insert_endpoint('%s');%n",name);
+            System.out.format("INSERT INTO endpoint_harvest(harvest,endpoint,location) SELECT currval('harvest_id_seq'::regclass),endpoint.id,'%s' FROM endpoint WHERE endpoint.name = '%s';%n",loc,name);
+        }
+        return CONTINUE;
+    }
+
     @Override
     public FileVisitResult visitFile(Path file,BasicFileAttributes attr) {
         System.err.format("-- OAI Request: %s%n", file);
@@ -34,18 +51,6 @@ public class OAIVisitor extends SimpleFileVisitor<Path> {
         return CONTINUE;
     }
     
-    @Override
-    public FileVisitResult preVisitDirectory(Path dir,BasicFileAttributes attr) {
-        System.err.format("-- OAI Endpoint: %s%n", dir);
-        Path loc = harvest.getDirectory().relativize(dir);
-        Path name = dir.getName(dir.getNameCount()-1);
-        if (!name.toString().equals("oai-pmh")) {
-            System.out.format("SELECT insert_endpoint('%s');%n",name);
-            System.out.format("INSERT INTO endpoint_harvest(harvest,endpoint,location) SELECT currval('harvest_id_seq'::regclass),endpoint.id,'%s' FROM endpoint WHERE endpoint.name = '%s';%n",loc,name);
-        }
-        return CONTINUE;
-    }
-
     // If there is some error accessing
     // the file, let the user know.
     // If you don't override this method

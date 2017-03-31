@@ -35,12 +35,12 @@ public class RecordVisitor extends SimpleFileVisitor<Path> {
                 "INSERT INTO \"record\"(identifier,\"metadataPrefix\",location,request)%n" +
                 "     SELECT \"record\".identifier,'%s','%s',\"record\".request%n" +
                 "       FROM \"record\", request, endpoint_harvest, endpoint%n" +
-                "      WHERE (regexp_replace(identifier,'[^a-zA-Z0-9]','','g') = regexp_replace('%s','[^a-zA-Z0-9]','','g'))%n" +
+                "      WHERE (alfanum = '%s')%n" +
                 "        AND \"record\".request = request.id%n" +
                 "        AND request.endpoint_harvest = endpoint_harvest.id%n" +
                 "        AND endpoint_harvest.endpoint = endpoint.id%n" +
                 "        AND endpoint.name= '%s';%n",
-            prefix, loc, id, endpoint);
+            prefix, loc, id.replaceAll("[^a-zA-Z0-9]","_"), endpoint);
         return CONTINUE;
     }
     

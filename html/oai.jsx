@@ -17,20 +17,34 @@ var Col = ReactBootstrap.Col;
 
 var Endpoints = React.createClass({
   getInitialState: function() {
-    return {data: []};
+    return {data: [], filter:""};
   },
-  componentDidMount: function() {
+  loadEndpoints: function(filter) {
+    if (filter == null)
+      filter = this.state.filter;
+    var f = "";
+    if (filter != "")
+      f = "name LIKE '%"+filter.replace(/'/g,"''")+"%'";
     $.ajax({
-      url: base + "endpoint?" + $.param({api_key:key}),
+      url: base + "endpoint?" + $.param({filter:f, api_key:key}),
       dataType: 'json',
       cache: false,
       success: function(data) {
-        this.setState({data: data.resource});
+        this.setState({data: data.resource, filter:filter});
       }.bind(this),
       error: function(xhr, status, err) {
         console.error(this.props.url, status, err.toString());
       }.bind(this)
     });
+  },
+  componentDidMount: function() {
+    this.loadEndpoints('');
+  },
+  handleFilter: function () {
+    this.loadEndpoints(this.refs.filterEndpoints.getValue());
+  },
+  handleChange: function() {
+    this.setState({filter:this.refs.filterEndpoints.getValue()});
   },
   render: function() {
     var endpoints = this.state.data.map(function(endpoint) {
@@ -38,65 +52,17 @@ var Endpoints = React.createClass({
         <Endpoint id={endpoint.id} name={endpoint.name}/>
       );
     });
+    var glyph = <Button onClick={this.handleFilter}>
+      <Glyphicon glyph="filter" />
+    </Button>;
     return <div>
       <Row>
         <Col xs={12} md={12} className="endpointsHeader">
           <Panel fill>
             <span className="section col-xs-4">Endpoints</span>
-          </Panel>
-        </Col>
-      </Row>
-      <Row>      
-        <Col xs={8} md={8} className="endpoints" fill>
-          <Table striped bordered condensed hover fill>
-            <thead>
-              <tr>
-                <th>name</th>
-             </tr>
-            </thead>
-            <tbody>
-              {endpoints}
-            </tbody>
-          </Table>
-        </Col>
-        <Col xs={4} md={4} className="endpointInfo" fill>
-          <Panel header="Endpoint Info">
-            <div id="_endpointInfo">Select an Endpoint</div>
-          </Panel>
-        </Col>
-      </Row>
-    </div>;
-  }
-});
-
-var Endpoints = React.createClass({
-  getInitialState: function() {
-    return {data: []};
-  },
-  componentDidMount: function() {
-    $.ajax({
-      url: base + "endpoint?" + $.param({api_key:key}),
-      dataType: 'json',
-      cache: false,
-      success: function(data) {
-        this.setState({data: data.resource});
-      }.bind(this),
-      error: function(xhr, status, err) {
-        console.error(this.props.url, status, err.toString());
-      }.bind(this)
-    });
-  },
-  render: function() {
-    var endpoints = this.state.data.map(function(endpoint) {
-      return (
-        <Endpoint id={endpoint.id} name={endpoint.name}/>
-      );
-    });
-    return <div>
-      <Row>
-        <Col xs={12} md={12} className="endpointsHeader">
-          <Panel fill>
-            <span className="section col-xs-4">Endpoints</span>
+            <span className="col-xs-4">
+              <Input ref="filterEndpoints" className="filter" type="text" hasFeedback placeholder="Enter endpoint filter" value={this.state.filter} buttonAfter={glyph} onChange={this.handleChange}/>
+            </span>
           </Panel>
         </Col>
       </Row>
@@ -131,7 +97,7 @@ var Endpoint = React.createClass({
       document.getElementById('_records')
     );
     ReactDOM.render(
-      <EndpointInfo endpoint={this.props.id} />,
+      <EndpointInfo endpoint={this.props.id} name={this.props.name}/>,
       document.getElementById('_endpointInfo')
     );
   },
@@ -171,23 +137,37 @@ var EndpointInfo = React.createClass({
     }
   },
   render: function() {
-    return <div>
-      <div>
-        <span>records: </span>
-        <span>{this.state.data.records}</span>
-      </div>
-      <div>
-        <span>requests: </span>
-        <span>{this.state.data.requests}</span>
-      </div>
-      <div>
-        <span>when: </span>
-        <span>{this.state.data.when}</span>
-      </div>
-    </div>;
+    return <Table striped bordered condensed hover>
+      <tbody>
+        <tr>
+          <td>check</td>
+          <td>
+            <a href={"https://clarin.oeaw.ac.at/curate/#!ResultView/collection//"+this.props.name} target="oai">curation module</a>
+          </td>
+        </tr>
+        <tr>
+          <td>records</td>
+          <td>{this.state.data.records}</td>
+        </tr>
+        <tr>
+          <td>requests</td>
+          <td>{this.state.data.requests}</td>
+        </tr>
+        <tr>
+          <td>when</td>
+          <td>{this.state.data.when}</td>
+        </tr>
+        <tr>
+          <td>where</td>
+          <td>
+            <a href="https://www.meertens.knaw.nl/flat/oaiprovider/?verb=Identify" target="oai">https://www.meertens.knaw.nl/flat/oaiprovider/?verb=Identify</a>
+          </td>
+        </tr>
+      </tbody>
+    </Table>;
   }
 });
-
+/**/
 var Records = React.createClass({
   getInitialState: function() {
     return {data: [], meta: {count:0}, page:1, endpoint:0, filter:""};
@@ -231,10 +211,10 @@ var Records = React.createClass({
     this.loadRecords(this.state.endpoint,page);
   },
   handleFilter: function () {
-    this.loadRecords(this.state.endpoint,1,this.refs.filter.getValue());
+    this.loadRecords(this.state.endpoint,1,this.refs.filterRecords.getValue());
   },
   handleChange: function() {
-    this.setState({filter:this.refs.filter.getValue()});
+    this.setState({filter:this.refs.filterRecords.getValue()});
   },
   render: function() {
     var filter = this.state.filter;
@@ -254,7 +234,7 @@ var Records = React.createClass({
           <Panel fill>
             <span className="section col-xs-4">Records</span>
             <span className="col-xs-4">
-              <Input ref="filter" className="filter" type="text" hasFeedback placeholder="Enter record filter" value={filter} buttonAfter={glyph} onChange={this.handleChange}/>
+              <Input ref="filterRecords" className="filter" type="text" hasFeedback placeholder="Enter record filter" value={this.state.filter} buttonAfter={glyph} onChange={this.handleChange}/>
             </span>
             <span className="col-xs-4">
               <Pagination className="pagination" 

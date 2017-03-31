@@ -144,7 +144,8 @@ ALTER SEQUENCE endpoint_id_seq OWNED BY endpoint.id;
 CREATE TABLE harvest (
     id integer NOT NULL,
     "when" timestamp with time zone DEFAULT now(),
-    location text
+    location text,
+    "type" text
 );
 
 
@@ -158,6 +159,7 @@ ALTER TABLE harvest OWNER TO oai;
 CREATE TABLE record (
     id integer NOT NULL,
     identifier text,
+    alfanum text,
     "metadataPrefix" text,
     location text,
     request integer
@@ -174,7 +176,9 @@ ALTER TABLE record OWNER TO oai;
 CREATE TABLE request (
     id integer NOT NULL,
     endpoint_harvest integer,
-    location text
+    location text,
+    url text,
+    "when" TIMESTAMP WITH TIME ZONE
 );
 
 
@@ -182,7 +186,7 @@ ALTER TABLE request OWNER TO oai;
 
 --
 -- TOC entry 196 (class 1259 OID 16711)
--- Name: endpoint_info; Type: VIEW; Schema: public; Owner: menzowi
+-- Name: endpoint_info; Type: VIEW; Schema: public; Owner: oai
 --
 
 CREATE VIEW endpoint_info AS
@@ -205,7 +209,7 @@ CREATE VIEW endpoint_info AS
   ORDER BY harvest."when" DESC;
 
 
-ALTER TABLE endpoint_info OWNER TO menzowi;
+ALTER TABLE endpoint_info OWNER TO oai;
 
 --
 -- TOC entry 195 (class 1259 OID 16700)
