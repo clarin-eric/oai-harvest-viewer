@@ -67,7 +67,7 @@ BEGIN
       FROM record AS r, record AS oai, request, endpoint_harvest, endpoint
       WHERE r.request ISNULL
         AND oai.alfanum = r.alfanum
-        AND oai.metadataPrefix = 'oai'
+        AND oai."metadataPrefix" = 'oai'
         AND oai.request = request.id
         AND request.endpoint_harvest = endpoint_harvest.id
         AND endpoint_harvest.endpoint = endpoint.id
