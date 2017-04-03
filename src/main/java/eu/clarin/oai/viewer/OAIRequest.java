@@ -8,10 +8,12 @@ package eu.clarin.oai.viewer;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 import javax.xml.namespace.QName;
 import org.codehaus.stax2.XMLInputFactory2;
 import org.codehaus.stax2.XMLStreamReader2;
@@ -30,14 +32,19 @@ public class OAIRequest {
     }
 
     Path request = null;
+    Path location = null;
     
-    public OAIRequest(Path request) {
+    public OAIRequest(Path request,Path location) {
         this.request = request;
+        this.location = location;
     }
     
     public void getRecords() {
         SimpleDateFormat xsd = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
         xsd.setLenient(false); // be strict
+        
+        HashMap<String,String> records = new HashMap<>();
+        
         XMLInputFactory2 xmlif = null;
         InputStream in = null;
         XMLStreamReader2 xmlr = null;
@@ -166,7 +173,7 @@ public class OAIRequest {
                         }       
                         break;
                     case SCENARIO:
-                        //System.out.println("DBG: state[SCENARIO]");
+                        //System.out.println("DBG: state[SCENARIO]");                        
                         switch (eventType) {
                             case XMLEvent2.START_ELEMENT:
                                 if (qn.getNamespaceURI().equals(OAI_NS) && qn.getLocalPart().equals("record")) {
@@ -181,6 +188,16 @@ public class OAIRequest {
                                 } else if (depth==sdepth && qn.getNamespaceURI().equals(STATIC_NS) && (qn.getLocalPart().equals("ListRecords") || qn.getLocalPart().equals("GetRecord"))) {
                                     state = State.REPOSITORY;
                                     sdepth--;
+                                }
+                                if (state != State.SCENARIO) {
+                                    if (!records.isEmpty()) {
+                                        // identifier sometimes appear multiple times (possibly in other requests to the same endpoint),
+                                        // the harvester will overwrite the files using this identifier so only the last one is maintained
+                                        // reflected in SQL by doing an UPSERT overwritting only the location and request
+                                        System.out.format("INSERT INTO record(identifier,alfanum,\"metadataPrefix\",location,request) VALUES %n  ");
+                                        System.out.print(records.values().stream().collect(Collectors.joining(",\n  ")));
+                                        System.out.format("%n ON CONFLICT ON CONSTRAINT unique_identifier DO UPDATE SET location=EXCLUDED.location,request=EXCLUDED.request;%n");
+                                    }
                                 }
                                 break;
                         }       
@@ -223,11 +240,14 @@ public class OAIRequest {
                         //System.out.println("DBG: state[IDENTIFIER]");
                         switch (eventType) {
                             case XMLEvent2.CHARACTERS:
-                                String id = xmlr.getText();
-                                System.err.format("-- OAI Record: %s%n", id);
-                                // identifier sometimes appear multiple times, the harvester will overwrite the files using this identifier so only the last one is maintained
-                                // reflected in SQL by doing an UPSERT overwritting only the location and request
-                                System.out.format("INSERT INTO record(identifier,alfanum,\"metadataPrefix\",location,request) SELECT '%s','%s','oai',location||'#'||'%s',id FROM request WHERE id = currval('request_id_seq'::regclass) ON CONFLICT ON CONSTRAINT unique_identifier DO UPDATE SET location=EXCLUDED.location,request=EXCLUDED.request;%n",id,id.replaceAll("[^a-zA-Z0-9]","_"),id);
+                                String id = xmlr.getText().trim();
+                                if (records.containsKey(id))
+                                    System.err.format("-- duplicate! OAI Record: %s%n", id);
+                                else
+                                    System.err.format("-- OAI Record: %s%n", id);
+                                String sql = String.format("('%s','%s','oai','%s#%s', currval('request_id_seq'::regclass))",id,id.replaceAll("[^a-zA-Z0-9]","_"),this.location,id);
+                                // the records map will only retain the info of the last record with a specific identifier
+                                records.put(id,sql);
                                 break;
                             case XMLEvent2.END_ELEMENT:
                                 if (depth==sdepth && qn.getNamespaceURI().equals(OAI_NS) && qn.getLocalPart().equals("identifier")) {

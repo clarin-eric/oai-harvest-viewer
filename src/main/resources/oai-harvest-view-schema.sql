@@ -53,8 +53,32 @@ BEGIN
 END;
 $$;
 
-
 ALTER FUNCTION public.insert_endpoint(name character varying) OWNER TO oai;
+
+CREATE OR REPLACE FUNCTION public.link_record(hid bigint) RETURNS void
+    LANGUAGE 'plpgsql'
+    AS $$
+
+BEGIN
+    UPDATE record 
+    SET identifier = rr.identifier, request = rr.request
+    FROM (
+      SELECT r.id, oai.identifier, oai.request
+      FROM record AS r, record AS oai, request, endpoint_harvest, endpoint
+      WHERE r.request ISNULL
+        AND oai.alfanum = r.alfanum
+        AND oai.metadataPrefix = 'oai'
+        AND oai.request = request.id
+        AND request.endpoint_harvest = endpoint_harvest.id
+        AND endpoint_harvest.endpoint = endpoint.id
+        AND endpoint.name = r.endpoint_name
+        AND endpoint_harvest.harvest = hid
+    ) AS rr
+    WHERE record.id = rr.id;END;
+
+$$;
+
+ALTER FUNCTION public.link_record(bigint) OWNER TO oai;
 
 SET default_tablespace = '';
 
@@ -162,7 +186,8 @@ CREATE TABLE record (
     alfanum text,
     "metadataPrefix" text,
     location text,
-    request integer
+    request integer,
+    endpoint_name text
 );
 
 

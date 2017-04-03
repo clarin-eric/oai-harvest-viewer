@@ -46,7 +46,7 @@ public class OAIVisitor extends SimpleFileVisitor<Path> {
         System.err.format("-- OAI Request: %s%n", file);
         Path loc = harvest.getDirectory().relativize(file);
         System.out.format("INSERT INTO request(endpoint_harvest,location) VALUES(currval('endpoint_harvest_id_seq'::regclass),'%s');%n",loc);
-        OAIRequest request = new OAIRequest(file);
+        OAIRequest request = new OAIRequest(file,loc);
         request.getRecords();
         return CONTINUE;
     }

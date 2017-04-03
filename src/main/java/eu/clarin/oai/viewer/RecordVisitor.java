@@ -19,34 +19,49 @@ import java.nio.file.attribute.BasicFileAttributes;
 public class RecordVisitor extends SimpleFileVisitor<Path> {
     
     protected Harvest harvest = null;
+    protected int records = 0;
     
     public RecordVisitor(Harvest harvest) {
         this.harvest = harvest;
     }
     
     @Override
+    public FileVisitResult preVisitDirectory(Path dir,BasicFileAttributes attr) {
+        System.err.format("-- Record Directory: %s%n", dir);
+        
+        records = 0;
+        return CONTINUE;
+    }
+
+    @Override
     public FileVisitResult visitFile(Path file,BasicFileAttributes attr) {
+        if (records == 0)
+            System.out.format("INSERT INTO \"record\"(\"metadataPrefix\",location,endpoint_name,alfanum) VALUES %n");
+        else
+            System.out.format(",%n");
+
+        System.err.format("-- Record: %s%n", file);
+
         Path loc = harvest.getDirectory().relativize(file);
         String id = file.getFileName().toString().replaceAll("\\.[^.]+$","");
         Path endpoint = file.getName(file.getNameCount()-2);
         Path prefix = file.getName(file.getNameCount()-3);
-        System.err.format("-- Record: %s%n", file);
-        System.out.format(
-                "INSERT INTO \"record\"(identifier,\"metadataPrefix\",location,request)%n" +
-                "     SELECT \"record\".identifier,'%s','%s',\"record\".request%n" +
-                "       FROM \"record\", request, endpoint_harvest, endpoint%n" +
-                "      WHERE (alfanum = '%s')%n" +
-                "        AND \"record\".request = request.id%n" +
-                "        AND request.endpoint_harvest = endpoint_harvest.id%n" +
-                "        AND endpoint_harvest.endpoint = endpoint.id%n" +
-                "        AND endpoint.name= '%s';%n",
-            prefix, loc, id.replaceAll("[^a-zA-Z0-9]","_"), endpoint);
+        System.out.format("  ('%s', '%s', '%s', '%s')", prefix, loc, endpoint, id.replaceAll("[^a-zA-Z0-9]","_"));
+
+        records++;
         return CONTINUE;
     }
-    
+
     @Override
-    public FileVisitResult preVisitDirectory(Path dir,BasicFileAttributes attr) {
-        System.err.format("-- Record Directory: %s%n", dir);
+    public FileVisitResult postVisitDirectory(Path dir,IOException ex) {
+        if (ex!=null) {
+            System.err.println(ex);
+        } else {
+
+            if (records>0)
+                System.out.format(";%n");
+
+        }
         return CONTINUE;
     }
 

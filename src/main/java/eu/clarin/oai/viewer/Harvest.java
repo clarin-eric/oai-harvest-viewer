@@ -48,6 +48,7 @@ public class Harvest {
     }
     
     public boolean crawl() {
+        // begin transaction
         System.out.format("BEGIN;%n");
         System.err.format("-- OAI Harvest: %s%n", dir);
         System.out.format("INSERT INTO harvest(location,type) VALUES ('%s', '%s');%n", dir, type);
@@ -68,6 +69,9 @@ public class Harvest {
             Logger.getLogger(Harvest.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
+        // link en mass converted records to the OAI request
+        System.out.format("SELECT link_record(currval('harvest_id_seq'::regclass));%n");
+        // end transaction
         System.out.format("COMMIT;%n");
         return true;
     }
