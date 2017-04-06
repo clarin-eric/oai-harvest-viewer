@@ -1,7 +1,8 @@
 // OAI DreamFactory API
 var base = "http://localhost/api/v2/oai/_table/";
-var key = "b4d819606353e94cecee7bfa389f32013a41c1017fcd97d29f06d4d3648efaa3";
-var pagesize = 1000;
+var key = "8fd48ae10415e9e3622d2d170bfd4be3b34ba23f590a4425713c175458619838";
+var endPagesize = 10;
+var recPagesize = 1000;
 
 // react-bootstrap imports
 var PageHeader = ReactBootstrap.PageHeader;
@@ -17,20 +18,24 @@ var Col = ReactBootstrap.Col;
 
 var Endpoints = React.createClass({
   getInitialState: function() {
-    return {data: [], filter:""};
+    return {data: [], meta: {count:0}, page:1, filter:""};
   },
-  loadEndpoints: function(filter) {
+  loadEndpoints: function(page,filter) {
+    $(".endpoints .highlight").removeClass("highlight");
+    if (page == null)
+      page = 1;
     if (filter == null)
       filter = this.state.filter;
+    var offset = (page - 1) * endPagesize;
     var f = "";
     if (filter != "")
       f = "name LIKE '%"+filter.replace(/'/g,"''")+"%'";
     $.ajax({
-      url: base + "endpoint?" + $.param({filter:f, api_key:key}),
+      url: base + "endpoint?" + $.param({offset:offset, limit:endPagesize, include_count:true, filter:f, api_key:key, order:'name ASC'}),
       dataType: 'json',
       cache: false,
       success: function(data) {
-        this.setState({data: data.resource, filter:filter});
+        this.setState({data: data.resource, meta:data.meta, page:page, filter:filter});
       }.bind(this),
       error: function(xhr, status, err) {
         console.error(this.props.url, status, err.toString());
@@ -38,15 +43,22 @@ var Endpoints = React.createClass({
     });
   },
   componentDidMount: function() {
-    this.loadEndpoints('');
+    this.loadEndpoints(1,'');
+  },
+  handleSelect: function (event, selectedEvent) {
+    var page = selectedEvent.eventKey;
+    this.loadEndpoints(page);
   },
   handleFilter: function () {
-    this.loadEndpoints(this.refs.filterEndpoints.getValue());
+    this.loadEndpoints(1,this.refs.filterEndpoints.getValue());
   },
   handleChange: function() {
     this.setState({filter:this.refs.filterEndpoints.getValue()});
   },
   render: function() {
+    var filter = this.state.filter;
+    var page = this.state.page;
+    var pages = Math.ceil(this.state.meta.count / endPagesize);
     var endpoints = this.state.data.map(function(endpoint) {
       return (
         <Endpoint id={endpoint.id} name={endpoint.name}/>
@@ -57,11 +69,24 @@ var Endpoints = React.createClass({
     </Button>;
     return <div>
       <Row>
-        <Col xs={12} md={12} className="endpointsHeader">
+        <Col xs={12} md={12} className="endpointsHeader" fill>
           <Panel fill>
             <span className="section col-xs-4">Endpoints</span>
             <span className="col-xs-4">
               <Input ref="filterEndpoints" className="filter" type="text" hasFeedback placeholder="Enter endpoint filter" value={this.state.filter} buttonAfter={glyph} onChange={this.handleChange}/>
+            </span>
+            <span className="col-xs-4">
+              <Pagination className="pagination" 
+                prev
+                next
+                first
+                last
+                ellipsis
+                items={pages}
+                maxButtons={5}
+                activePage={page}
+                onSelect={this.handleSelect}
+              />
             </span>
           </Panel>
         </Col>
@@ -173,18 +198,18 @@ var Records = React.createClass({
     return {data: [], meta: {count:0}, page:1, endpoint:0, filter:""};
   },
   loadRecords: function(endpoint,page,filter) {
-    $("#records .highlight").removeClass("highlight");
+    $(".records .highlight").removeClass("highlight");
     if (page == null)
       page = 1;
     if (filter == null)
       filter = this.state.filter;
-    var offset = (page - 1) * pagesize;
+    var offset = (page - 1) * recPagesize;
     this.state.endpoint = endpoint;
     var f = "";
     if (filter != "")
       f = " AND (identifier LIKE '%"+filter.replace(/'/g,"''")+"%')";
     $.ajax({
-    url: base + "endpoint_record?" + $.param({offset:offset, include_count:true, filter:"(metadataPrefix='cmdi') AND (endpoint="+endpoint+")"+f , api_key:key}),
+    url: base + "endpoint_record?" + $.param({offset:offset, limit:recPagesize, include_count:true, filter:"(metadataPrefix='cmdi') AND (endpoint="+endpoint+")"+f , api_key:key}),
       dataType: 'json',
       cache: false,
       success: function(data) {
@@ -219,7 +244,7 @@ var Records = React.createClass({
   render: function() {
     var filter = this.state.filter;
     var page = this.state.page;
-    var pages = Math.ceil(this.state.meta.count / pagesize);
+    var pages = Math.ceil(this.state.meta.count / recPagesize);
     var records = this.state.data.map(function(record) {
       return (
         <Record id={record.id} identifier={record.identifier}/>
