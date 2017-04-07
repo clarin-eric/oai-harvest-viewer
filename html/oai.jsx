@@ -1,6 +1,6 @@
 // OAI DreamFactory API
 var base = "http://localhost/api/v2/oai/_table/";
-var key = "8fd48ae10415e9e3622d2d170bfd4be3b34ba23f590a4425713c175458619838";
+var key = "00551c93af07a0e2c22628ad6214b9ab250cdfa82a5be2fc04789920e27a7170";
 var endPagesize = 10;
 var recPagesize = 1000;
 
@@ -31,7 +31,7 @@ var Endpoints = React.createClass({
     if (filter != "")
       f = "name LIKE '%"+filter.replace(/'/g,"''")+"%'";
     $.ajax({
-      url: base + "endpoint?" + $.param({offset:offset, limit:endPagesize, include_count:true, filter:f, api_key:key, order:'name ASC'}),
+      url: base + "endpoint?" + $.param({offset:offset, limit:endPagesize, include_count:true, filter:f, api_key:key, order:'name ASC', related:'harvest_by_endpoint_harvest,endpoint_harvest_by_endpoint'}),
       dataType: 'json',
       cache: false,
       success: function(data) {
@@ -61,7 +61,7 @@ var Endpoints = React.createClass({
     var pages = Math.ceil(this.state.meta.count / endPagesize);
     var endpoints = this.state.data.map(function(endpoint) {
       return (
-        <Endpoint id={endpoint.id} name={endpoint.name}/>
+        <Endpoint id={endpoint.id} name={endpoint.name} type={endpoint.harvest_by_endpoint_harvest[0].type} url={endpoint.endpoint_harvest_by_endpoint[0].url}/>
       );
     });
     var glyph = <Button onClick={this.handleFilter}>
@@ -97,6 +97,7 @@ var Endpoints = React.createClass({
             <thead>
               <tr>
                 <th>name</th>
+                <th>type</th>
              </tr>
             </thead>
             <tbody>
@@ -122,13 +123,14 @@ var Endpoint = React.createClass({
       document.getElementById('_records')
     );
     ReactDOM.render(
-      <EndpointInfo endpoint={this.props.id} name={this.props.name}/>,
+      <EndpointInfo endpoint={this.props.id} name={this.props.name} url={this.props.url}/>,
       document.getElementById('_endpointInfo')
     );
   },
   render: function() {
     return <tr onClick={this.handleClick}>
-      <td>{this.props.name}</td>
+      <td>{this.props.name.replace(/_/g," ")}</td>
+      <td>{this.props.type}</td>
     </tr>
   }
 });
@@ -185,7 +187,7 @@ var EndpointInfo = React.createClass({
         <tr>
           <td>where</td>
           <td>
-            <a href="https://www.meertens.knaw.nl/flat/oaiprovider/?verb=Identify" target="oai">https://www.meertens.knaw.nl/flat/oaiprovider/?verb=Identify</a>
+            <a href={this.props.url} target="oai">{this.props.url}</a>
           </td>
         </tr>
       </tbody>

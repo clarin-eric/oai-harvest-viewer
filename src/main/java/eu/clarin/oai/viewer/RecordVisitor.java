@@ -46,7 +46,7 @@ public class RecordVisitor extends SimpleFileVisitor<Path> {
         String id = file.getFileName().toString().replaceAll("\\.[^.]+$","");
         Path endpoint = file.getName(file.getNameCount()-2);
         Path prefix = file.getName(file.getNameCount()-3);
-        System.out.format("  ('%s', '%s', '%s', '%s')", prefix, loc, endpoint, id.replaceAll("[^a-zA-Z0-9]","_"));
+        System.out.format("  ('%s', '%s', '%s', '%s')", prefix, loc, endpoint, id);
 
         records++;
         return CONTINUE;

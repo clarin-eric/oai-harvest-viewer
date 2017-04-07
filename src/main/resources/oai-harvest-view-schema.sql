@@ -106,7 +106,8 @@ CREATE TABLE endpoint_harvest (
     id integer NOT NULL,
     location text,
     harvest integer,
-    endpoint integer
+    endpoint integer,
+    url text
 );
 
 
@@ -218,7 +219,8 @@ CREATE VIEW endpoint_info AS
  SELECT endpoint.id,
     COALESCE(requests.count, (0)::bigint) AS requests,
     COALESCE(records.count, (0)::bigint) AS records,
-    harvest."when"
+    harvest."when",
+    harvest."type"
    FROM ((((endpoint
      JOIN endpoint_harvest ON ((endpoint.id = endpoint_harvest.endpoint)))
      JOIN harvest ON ((harvest.id = endpoint_harvest.harvest)))
@@ -246,7 +248,7 @@ CREATE VIEW endpoint_record WITH (security_barrier='false') AS
     record.identifier,
     record."metadataPrefix",
     record.location,
-    record.request,
+    request.id AS request,
     endpoint_harvest.endpoint,
     endpoint_harvest.harvest
    FROM ((record

@@ -20,6 +20,7 @@ public class OAIVisitor extends SimpleFileVisitor<Path> {
     
     protected String reqsDirName = "oai-pmh";
     protected Harvest harvest = null;
+    protected int requests = 0;
     
     public OAIVisitor(Harvest harvest) {
         this.harvest = harvest;
@@ -38,6 +39,7 @@ public class OAIVisitor extends SimpleFileVisitor<Path> {
             System.out.format("SELECT insert_endpoint('%s');%n",name);
             System.out.format("INSERT INTO endpoint_harvest(harvest,endpoint,location) SELECT currval('harvest_id_seq'::regclass),endpoint.id,'%s' FROM endpoint WHERE endpoint.name = '%s';%n",loc,name);
         }
+        requests = 0;
         return CONTINUE;
     }
 
@@ -46,8 +48,9 @@ public class OAIVisitor extends SimpleFileVisitor<Path> {
         System.err.format("-- OAI Request: %s%n", file);
         Path loc = harvest.getDirectory().relativize(file);
         System.out.format("INSERT INTO request(endpoint_harvest,location) VALUES(currval('endpoint_harvest_id_seq'::regclass),'%s');%n",loc);
-        OAIRequest request = new OAIRequest(file,loc);
+        OAIRequest request = new OAIRequest(file,loc,requests);
         request.getRecords();
+        requests++;
         return CONTINUE;
     }
     

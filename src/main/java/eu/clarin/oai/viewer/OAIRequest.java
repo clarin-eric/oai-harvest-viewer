@@ -8,6 +8,7 @@ package eu.clarin.oai.viewer;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.Normalizer;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -28,15 +29,17 @@ public class OAIRequest {
     static final String OAI_NS = "http://www.openarchives.org/OAI/2.0/";
     
     private enum State {
-        START,OAI,REPOSITORY,RESPONSE,REQUEST,SCENARIO,RECORD,HEADER,IDENTIFIER,STOP,ERROR
+        START,OAI,REPOSITORY,IDENTIFY,BASEURL,RESPONSE,REQUEST,SCENARIO,RECORD,HEADER,IDENTIFIER,STOP,ERROR
     }
 
-    Path request = null;
-    Path location = null;
+    protected Path request = null;
+    protected Path location = null;
+    protected int requests = 0;
     
-    public OAIRequest(Path request,Path location) {
+    public OAIRequest(Path request,Path location,int requests) {
         this.request = request;
         this.location = location;
+        this.requests = requests;
     }
     
     public void getRecords() {
@@ -44,6 +47,7 @@ public class OAIRequest {
         xsd.setLenient(false); // be strict
         
         HashMap<String,String> records = new HashMap<>();
+        String url = null;
         
         XMLInputFactory2 xmlif = null;
         InputStream in = null;
@@ -100,11 +104,45 @@ public class OAIRequest {
                                 if (qn.getNamespaceURI().equals(STATIC_NS) && (qn.getLocalPart().equals("ListRecords") || qn.getLocalPart().equals("GetRecord"))) {
                                     state = State.SCENARIO;
                                     sdepth = depth;
+                                } else if (qn.getNamespaceURI().equals(STATIC_NS) && qn.getLocalPart().equals("Identify")) {
+                                    state = State.IDENTIFY;
+                                    sdepth = depth;
                                 }
                                 break;
                             case XMLEvent2.END_ELEMENT:
                                 if (depth==sdepth && qn.getNamespaceURI().equals(STATIC_NS) && qn.getLocalPart().equals("Repository")) {
                                     state = State.STOP;
+                                }
+                                break;
+                        }       
+                        break;
+                    case IDENTIFY:
+                        //System.out.println("DBG: state[IDENTIFY]");
+                        switch (eventType) {
+                            case XMLEvent2.START_ELEMENT:
+                                if (qn.getNamespaceURI().equals(OAI_NS) && qn.getLocalPart().equals("baseURL")) {
+                                    state = State.BASEURL;
+                                }
+                                break;
+                            case XMLEvent2.END_ELEMENT:
+                                if (qn.getNamespaceURI().equals(STATIC_NS) && qn.getLocalPart().equals("Identify")) {
+                                    state = State.REPOSITORY;
+                                }
+                                break;
+                        }       
+                        break;
+                    case BASEURL:
+                        //System.out.println("DBG: state[BASEURL]");
+                        switch (eventType) {
+                            case XMLEvent2.CHARACTERS:
+                                if (requests==0) {
+                                    url = xmlr.getText();
+                                    System.out.format("UPDATE endpoint_harvest SET \"url\" = '%s' WHERE id = currval('endpoint_harvest_id_seq'::regclass);%n", url);
+                                }
+                                break;
+                            case XMLEvent2.END_ELEMENT:
+                                if (qn.getNamespaceURI().equals(OAI_NS) && qn.getLocalPart().equals("baseURL")) {
+                                    state = State.IDENTIFY;
                                 }
                                 break;
                         }       
@@ -130,6 +168,8 @@ public class OAIRequest {
                                 break;
                             case XMLEvent2.END_ELEMENT:
                                 if (depth==sdepth && qn.getNamespaceURI().equals(OAI_NS) && qn.getLocalPart().equals("OAI-PMH")) {
+                                    if (requests == 0 && url != null)
+                                        System.out.format("UPDATE endpoint_harvest SET \"url\" = '%s?verb=Identify' WHERE id = currval('endpoint_harvest_id_seq'::regclass);%n", url);
                                     state = State.STOP;
                                 }
                                 break;
@@ -160,6 +200,8 @@ public class OAIRequest {
                         switch (eventType) {
                             case XMLEvent2.CHARACTERS:
                                 String uri = xmlr.getText();
+                                if (url == null)
+                                    url = uri;
                                 if (!params.equals(""))
                                     uri += "?"+params;
                                 System.out.format("UPDATE request SET url = '%s' WHERE id = currval('request_id_seq'::regclass);%n", uri);
@@ -245,7 +287,7 @@ public class OAIRequest {
                                     System.err.format("-- duplicate! OAI Record: %s%n", id);
                                 else
                                     System.err.format("-- OAI Record: %s%n", id);
-                                String sql = String.format("('%s','%s','oai','%s#%s', currval('request_id_seq'::regclass))",id,id.replaceAll("[^a-zA-Z0-9]","_"),this.location,id);
+                                String sql = String.format("('%s','%s','oai','%s#%s', currval('request_id_seq'::regclass))", id, toAlfaNum(id), this.location, id);
                                 // the records map will only retain the info of the last record with a specific identifier
                                 records.put(id,sql);
                                 break;
@@ -278,4 +320,13 @@ public class OAIRequest {
             }
         }
     }
+    
+    protected String toAlfaNum(String name) {
+	if (name == null)
+	    return null;
+
+	return Normalizer.normalize(name.trim(), Normalizer.Form.NFD)
+		.replaceAll("\\p{M}", "").replaceAll("\\W+", "_");
+    }
+    
 }
