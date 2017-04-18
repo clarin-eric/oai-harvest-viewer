@@ -4,6 +4,11 @@ var key = "00551c93af07a0e2c22628ad6214b9ab250cdfa82a5be2fc04789920e27a7170";
 var endPagesize = 10;
 var recPagesize = 1000;
 
+// endpoints
+var curationModule = "https://clarin.oeaw.ac.at/curate/#!ResultView/collection/";
+var logDir         = "file:///Users/menzowi/Documents/Projects/OAI/harvester/logs";
+
+
 // react-bootstrap imports
 var PageHeader = ReactBootstrap.PageHeader;
 var Table = ReactBootstrap.Table;
@@ -123,7 +128,7 @@ var Endpoint = React.createClass({
       document.getElementById('_records')
     );
     ReactDOM.render(
-      <EndpointInfo endpoint={this.props.id} name={this.props.name} url={this.props.url}/>,
+      <EndpointInfo endpoint={this.props.id} type={this.props.type} name={this.props.name} url={this.props.url}/>,
       document.getElementById('_endpointInfo')
     );
   },
@@ -164,14 +169,23 @@ var EndpointInfo = React.createClass({
     }
   },
   render: function() {
+    var log= "";
+    if (logDir != null)
+      log = <tr key="log">
+              <td>log</td>
+              <td>
+                <a href={logDir+"/"+this.props.type+"-"+this.props.type+"/"+this.props.name+".log"} target="log">log file</a>
+              </td>
+            </tr>;
     return <Table striped bordered condensed hover>
       <tbody>
         <tr key="check">
           <td>check</td>
           <td>
-            <a href={"https://clarin.oeaw.ac.at/curate/#!ResultView/collection//"+this.props.name} target="oai">curation module</a>
+            <a href={curationModule+"/"+this.props.name} target="oai">curation module</a>
           </td>
         </tr>
+        {log}
         <tr key="records">
           <td>records</td>
           <td>{this.state.data.records}</td>
@@ -249,7 +263,7 @@ var Records = React.createClass({
     var pages = Math.ceil(this.state.meta.count / recPagesize);
     var records = this.state.data.map(function(record) {
       return (
-        <Record key={record.id} id={record.id} identifier={record.identifier}/>
+        <Record key={record.id} id={record.id} harvest={record.harvest} endpoint={record.endpoint} identifier={record.identifier}/>
       );
     });
     var glyph = <Button onClick={this.handleFilter}>
@@ -293,7 +307,9 @@ var Records = React.createClass({
           </Table>
         </Col>
         <Col xs={4} md={4} className="recordInfo" fill>
-          <Panel header="Record Info" />
+          <Panel header="Record Info">
+            <div id="_recordInfo">Select an Record</div>
+          </Panel>
         </Col>
       </Row>
     </div>;
@@ -303,11 +319,63 @@ var Records = React.createClass({
 var Record = React.createClass({
   handleClick: function(me) {
     $(ReactDOM.findDOMNode(this)).addClass('highlight').siblings().removeClass('highlight');
+    ReactDOM.render(
+      <RecordInfo endpoint={this.props.endpoint} identifier={this.props.identifier} harvest={this.props.harvest}/>,
+      document.getElementById('_recordInfo')
+    );
   },  
   render: function() {
     return <tr key={this.props.id} onClick={this.handleClick}>
       <td>{this.props.identifier}</td>
     </tr>
+  }
+});
+
+var RecordInfo = React.createClass({
+  getInitialState: function() {
+    return {data: { resource: [ { metadataPrefix: "none"}] } };
+  },
+  loadInfo: function(harvest,endpoint,identifier) {
+    $.ajax({
+      url: base + "endpoint_record?" + $.param({api_key:key, filter:"(harvest="+harvest+") AND (endpoint="+endpoint+") AND (identifier='"+identifier+"')"}),
+      dataType: 'json',
+      cache: false,
+      success: function(data) {
+        this.setState({data: data});
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(this.props.url, status, err.toString());
+      }.bind(this)
+    });
+  },
+  componentDidMount: function() {
+    var harvest    = this.props.harvest;
+    var endpoint   = this.props.endpoint;
+    var identifier = this.props.identifier;
+    if (harvest && endpoint && identifier)
+      this.loadInfo(harvest,endpoint,identifier);
+  },
+  componentWillReceiveProps: function (nextProps) {
+    var harvest    = nextProps.harvest;
+    var endpoint   = nextProps.endpoint;
+    var identifier = nextProps.identifier;
+    if (harvest && endpoint && identifier)
+      this.loadInfo(harvest,endpoint,identifier);
+  },
+  render: function() {
+    var reps = this.state.data.resource.map(function(resource) {
+      return (
+        <tr key={resource.metadataPrefix}>
+          <td>{resource.metadataPrefix}</td>
+          <td>{resource.location}</td>
+        </tr>
+      );
+    })
+    return <Table striped bordered condensed hover>
+      <tbody>
+        {reps}
+      </tbody>
+    </Table>;
   }
 });
 
