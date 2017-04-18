@@ -61,7 +61,7 @@ var Endpoints = React.createClass({
     var pages = Math.ceil(this.state.meta.count / endPagesize);
     var endpoints = this.state.data.map(function(endpoint) {
       return (
-        <Endpoint id={endpoint.id} name={endpoint.name} type={endpoint.harvest_by_endpoint_harvest[0].type} url={endpoint.endpoint_harvest_by_endpoint[0].url}/>
+        <Endpoint key={endpoint.id} id={endpoint.id} name={endpoint.name} type={endpoint.harvest_by_endpoint_harvest[0].type} url={endpoint.endpoint_harvest_by_endpoint[0].url}/>
       );
     });
     var glyph = <Button onClick={this.handleFilter}>
@@ -128,7 +128,7 @@ var Endpoint = React.createClass({
     );
   },
   render: function() {
-    return <tr onClick={this.handleClick}>
+    return <tr key={this.props.id} onClick={this.handleClick}>
       <td>{this.props.name.replace(/_/g," ")}</td>
       <td>{this.props.type}</td>
     </tr>
@@ -166,25 +166,25 @@ var EndpointInfo = React.createClass({
   render: function() {
     return <Table striped bordered condensed hover>
       <tbody>
-        <tr>
+        <tr key="check">
           <td>check</td>
           <td>
             <a href={"https://clarin.oeaw.ac.at/curate/#!ResultView/collection//"+this.props.name} target="oai">curation module</a>
           </td>
         </tr>
-        <tr>
+        <tr key="records">
           <td>records</td>
           <td>{this.state.data.records}</td>
         </tr>
-        <tr>
+        <tr key="requests">
           <td>requests</td>
           <td>{this.state.data.requests}</td>
         </tr>
-        <tr>
+        <tr key="when">
           <td>when</td>
           <td>{this.state.data.when}</td>
         </tr>
-        <tr>
+        <tr key="where">
           <td>where</td>
           <td>
             <a href={this.props.url} target="oai">{this.props.url}</a>
@@ -249,7 +249,7 @@ var Records = React.createClass({
     var pages = Math.ceil(this.state.meta.count / recPagesize);
     var records = this.state.data.map(function(record) {
       return (
-        <Record id={record.id} identifier={record.identifier}/>
+        <Record key={record.id} id={record.id} identifier={record.identifier}/>
       );
     });
     var glyph = <Button onClick={this.handleFilter}>
@@ -305,7 +305,7 @@ var Record = React.createClass({
     $(ReactDOM.findDOMNode(this)).addClass('highlight').siblings().removeClass('highlight');
   },  
   render: function() {
-    return <tr onClick={this.handleClick}>
+    return <tr key={this.props.id} onClick={this.handleClick}>
       <td>{this.props.identifier}</td>
     </tr>
   }
