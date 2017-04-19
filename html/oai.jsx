@@ -21,6 +21,7 @@ var Grid = ReactBootstrap.Grid;
 var Row = ReactBootstrap.Row;
 var Col = ReactBootstrap.Col;
 
+// A list of Endpoints
 var Endpoints = React.createClass({
   getInitialState: function() {
     return {data: [], meta: {count:0}, page:1, filter:""};
@@ -66,7 +67,7 @@ var Endpoints = React.createClass({
     var pages = Math.ceil(this.state.meta.count / endPagesize);
     var endpoints = this.state.data.map(function(endpoint) {
       return (
-        <Endpoint key={endpoint.id} id={endpoint.id} name={endpoint.name} type={endpoint.harvest_by_endpoint_harvest[0].type} url={endpoint.endpoint_harvest_by_endpoint[0].url}/>
+        <Endpoint key={endpoint.id} id={endpoint.id} name={endpoint.name} location={endpoint.harvest_by_endpoint_harvest[0].location} type={endpoint.harvest_by_endpoint_harvest[0].type} url={endpoint.endpoint_harvest_by_endpoint[0].url}/>
       );
     });
     var glyph = <Button onClick={this.handleFilter}>
@@ -120,11 +121,12 @@ var Endpoints = React.createClass({
   }
 });
 
+// A single Endpoint
 var Endpoint = React.createClass({
   handleClick: function(me) {
     $(ReactDOM.findDOMNode(this)).addClass('highlight').siblings().removeClass('highlight');
     ReactDOM.render(
-      <Records endpoint={this.props.id} />,
+      <Records endpoint={this.props.id} location={this.props.location} />,
       document.getElementById('_records')
     );
     ReactDOM.render(
@@ -140,6 +142,7 @@ var Endpoint = React.createClass({
   }
 });
 
+// Info on a single Endpoint
 var EndpointInfo = React.createClass({
   getInitialState: function() {
     return {data: []};
@@ -208,7 +211,8 @@ var EndpointInfo = React.createClass({
     </Table>;
   }
 });
-/**/
+
+// A list of Records
 var Records = React.createClass({
   getInitialState: function() {
     return {data: [], meta: {count:0}, page:1, endpoint:0, filter:""};
@@ -261,11 +265,11 @@ var Records = React.createClass({
     var filter = this.state.filter;
     var page = this.state.page;
     var pages = Math.ceil(this.state.meta.count / recPagesize);
-    var records = this.state.data.map(function(record) {
+    var records = this.state.data.map(function(location,record) {
       return (
-        <Record key={record.id} id={record.id} harvest={record.harvest} endpoint={record.endpoint} identifier={record.identifier}/>
+        <Record key={record.id} id={record.id} harvest={record.harvest} endpoint={record.endpoint} identifier={record.identifier} location={location}/>
       );
-    });
+    }.bind(null,this.props.location));
     var glyph = <Button onClick={this.handleFilter}>
       <Glyphicon glyph="filter" />
     </Button>;
@@ -316,11 +320,12 @@ var Records = React.createClass({
   }
 });
 
+// A single Record
 var Record = React.createClass({
   handleClick: function(me) {
     $(ReactDOM.findDOMNode(this)).addClass('highlight').siblings().removeClass('highlight');
     ReactDOM.render(
-      <RecordInfo endpoint={this.props.endpoint} identifier={this.props.identifier} harvest={this.props.harvest}/>,
+      <RecordInfo endpoint={this.props.endpoint} identifier={this.props.identifier} harvest={this.props.harvest} location={this.props.location}/>,
       document.getElementById('_recordInfo')
     );
   },  
@@ -331,6 +336,7 @@ var Record = React.createClass({
   }
 });
 
+// Info on a single Record
 var RecordInfo = React.createClass({
   getInitialState: function() {
     return {data: { resource: [ { metadataPrefix: "none"}] } };
@@ -363,14 +369,16 @@ var RecordInfo = React.createClass({
       this.loadInfo(harvest,endpoint,identifier);
   },
   render: function() {
-    var reps = this.state.data.resource.map(function(resource) {
+    var reps = this.state.data.resource.map(function(location,resource) {
       return (
         <tr key={resource.metadataPrefix}>
           <td>{resource.metadataPrefix}</td>
-          <td>{resource.location}</td>
+          <td>
+            <a href={location+"/"+resource.location} target="oai">{(resource.metadataPrefix=='oai')?"request":"record"}</a>
+          </td>
         </tr>
       );
-    })
+    }.bind(null,this.props.location));
     return <Table striped bordered condensed hover>
       <tbody>
         {reps}
@@ -379,6 +387,7 @@ var RecordInfo = React.createClass({
   }
 });
 
+// "main"
 ReactDOM.render(
   <Grid>
     <Row>
