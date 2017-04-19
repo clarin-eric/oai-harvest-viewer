@@ -258,6 +258,31 @@ CREATE VIEW endpoint_record WITH (security_barrier='false') AS
 
 ALTER TABLE endpoint_record OWNER TO oai;
 
+CREATE VIEW harvest_info AS
+ SELECT harvest.id,
+    COUNT(endpoint_harvest.endpoint) AS endpoints,
+    SUM(requests.count) AS requests,
+    SUM(records.count) AS records,
+    harvest."when",
+    harvest.type
+   FROM harvest
+     JOIN endpoint_harvest ON harvest.id = endpoint_harvest.harvest
+     LEFT JOIN ( SELECT request.endpoint_harvest,
+            count(*) AS count
+           FROM request
+          GROUP BY request.endpoint_harvest) requests ON endpoint_harvest.id = requests.endpoint_harvest
+     LEFT JOIN ( SELECT request.endpoint_harvest,
+            count(*) AS count
+           FROM request
+             JOIN record ON request.id = record.request
+          GROUP BY request.endpoint_harvest) records ON endpoint_harvest.id = records.endpoint_harvest
+  GROUP BY harvest.id
+  ORDER BY harvest."when" DESC;
+
+ALTER TABLE harvest_info OWNER TO oai;
+
+
+
 --
 -- TOC entry 190 (class 1259 OID 16634)
 -- Name: harvest_id_seq; Type: SEQUENCE; Schema: public; Owner: oai

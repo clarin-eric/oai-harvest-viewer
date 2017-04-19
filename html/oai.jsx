@@ -1,6 +1,6 @@
 // OAI DreamFactory API
 var base = "http://localhost/api/v2/oai/_table/";
-var key = "00551c93af07a0e2c22628ad6214b9ab250cdfa82a5be2fc04789920e27a7170";
+var key = "ed4e8d16c129cd67c1f08653229f8f3960dc56da55b23736373a927b540712bc";
 var endPagesize = 10;
 var recPagesize = 1000;
 
@@ -21,12 +21,93 @@ var Grid = ReactBootstrap.Grid;
 var Row = ReactBootstrap.Row;
 var Col = ReactBootstrap.Col;
 
+// A list of Harvests
+var Harvests = React.createClass({
+  getInitialState: function() {
+    return {data: []};
+  },
+  loadHarvests: function() {
+    $(".harvests .highlight").removeClass("highlight");
+    $.ajax({
+      url: base + "harvest_info?" + $.param({api_key:key, order:'type ASC'}),
+      dataType: 'json',
+      cache: false,
+      success: function(data) {
+        this.setState({data: data.resource});
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(this.props.url, status, err.toString());
+      }.bind(this)
+    });
+  },
+  componentDidMount: function() {
+    this.loadHarvests();
+  },
+  handleSelect: function (event, selectedEvent) {
+    this.loadHarvests();
+  },
+  render: function() {
+    var harvests = this.state.data.map(function(harvest) {
+      return (
+        <Harvest key={harvest.id} id={harvest.id} type={harvest.type} when={harvest.when} endpoints={harvest.endpoints} requests={harvest.requests} records={harvest.records}/>
+      );
+    });
+    return <div>
+      <Row>      
+        <Col xs={12} md={12} className="harvests" fill>
+          <Table striped bordered condensed hover fill>
+            <thead>
+              <tr>
+                <th>when</th>
+                <th>harvest</th>
+                <th>endpoints</th>
+                <th>requests</th>
+                <th>records</th>
+             </tr>
+            </thead>
+            <tbody>
+              {harvests}
+              <tr key="totals">
+                <th></th>
+                <th></th>
+                <th>{this.state.data.reduce(function(total,harvest) { return (total + Number(harvest.endpoints));},0)}</th>
+                <th>{this.state.data.reduce(function(total,harvest) { return (total + Number(harvest.requests));},0)}</th>
+                <th>{this.state.data.reduce(function(total,harvest) { return (total + Number(harvest.records));},0)}</th>
+              </tr>
+            </tbody>
+          </Table>
+        </Col>
+      </Row>
+    </div>;
+  }
+});
+
+// A single Harvest
+var Harvest = React.createClass({
+  handleClick: function(me) {
+    $(ReactDOM.findDOMNode(this)).addClass('highlight').siblings().removeClass('highlight');
+    ReactDOM.render(
+      <Endpoints harvest={this.props.id}/>,
+      document.getElementById('_endpoints')
+    );
+  },
+  render: function() {
+    return <tr key={this.props.id} onClick={this.handleClick}>
+      <td>{this.props.when}</td>
+      <td>{this.props.type}</td>
+      <td>{this.props.endpoints}</td>
+      <td>{this.props.requests}</td>
+      <td>{this.props.records}</td>
+    </tr>
+  }
+});
+
 // A list of Endpoints
 var Endpoints = React.createClass({
   getInitialState: function() {
     return {data: [], meta: {count:0}, page:1, filter:""};
   },
-  loadEndpoints: function(page,filter) {
+  loadEndpoints: function(page,filter,harvest) {
     $(".endpoints .highlight").removeClass("highlight");
     if (page == null)
       page = 1;
@@ -34,8 +115,15 @@ var Endpoints = React.createClass({
       filter = this.state.filter;
     var offset = (page - 1) * endPagesize;
     var f = "";
-    if (filter != "")
-      f = "name LIKE '%"+filter.replace(/'/g,"''")+"%'";
+    if (harvest)
+        f = "(harvest="+harvest+")";
+    else if (this.props.harvest)
+        f = "(harvest="+this.props.harvest+")";
+    if (filter != "") {
+      if (f != "")
+        f += " AND ";
+      f += "name LIKE '%"+filter.replace(/'/g,"''")+"%'";
+    }
     $.ajax({
       url: base + "endpoint?" + $.param({offset:offset, limit:endPagesize, include_count:true, filter:f, api_key:key, order:'name ASC', related:'harvest_by_endpoint_harvest,endpoint_harvest_by_endpoint'}),
       dataType: 'json',
@@ -50,6 +138,12 @@ var Endpoints = React.createClass({
   },
   componentDidMount: function() {
     this.loadEndpoints(1,'');
+  },
+  componentWillReceiveProps: function (nextProps) {
+    var harvest = nextProps.harvest;
+    if (harvest) {
+      this.loadEndpoints(1,'',harvest);
+    }
   },
   handleSelect: function (event, selectedEvent) {
     var page = selectedEvent.eventKey;
@@ -396,14 +490,19 @@ ReactDOM.render(
           <a href="http://www.clarin.eu/">
             <img src="static/clarin-logo.png" style={{height: 98 + 'px'}}/>
           </a>
-          OAI Viewer
+          OAI Harvest Viewer
         </PageHeader>
       </Col>
     </Row>
+    <div id="_harvests" />
     <div id="_endpoints" />
     <div id="_records" />
   </Grid>,
   document.getElementById('_content')
+);
+ReactDOM.render(
+  <Harvests/>,
+  document.getElementById('_harvests')
 );
 ReactDOM.render(
   <Endpoints/>,
