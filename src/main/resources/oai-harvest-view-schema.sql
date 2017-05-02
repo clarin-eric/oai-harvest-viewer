@@ -219,6 +219,9 @@ CREATE VIEW endpoint_info AS
  SELECT endpoint.id,
     COALESCE(requests.count, (0)::bigint) AS requests,
     COALESCE(records.count, (0)::bigint) AS records,
+    endpoint_harvest.location,
+    endpoint_harvest.url,
+    harvest.id AS harvest,
     harvest."when",
     harvest."type"
    FROM ((((endpoint
@@ -226,12 +229,13 @@ CREATE VIEW endpoint_info AS
      JOIN harvest ON ((harvest.id = endpoint_harvest.harvest)))
      LEFT JOIN ( SELECT request.endpoint_harvest,
             count(*) AS count
-           FROM request
+          FROM request
           GROUP BY request.endpoint_harvest) requests ON ((endpoint_harvest.id = requests.endpoint_harvest)))
      LEFT JOIN ( SELECT request.endpoint_harvest,
             count(*) AS count
-           FROM (request
-             JOIN record ON ((request.id = record.request)))
+          FROM (request
+          JOIN record ON ((request.id = record.request)))
+﻿         WHERE record."metadataPrefix" = 'cmdi'
           GROUP BY request.endpoint_harvest) records ON ((endpoint_harvest.id = records.endpoint_harvest)))
   ORDER BY harvest."when" DESC;
 
@@ -275,6 +279,7 @@ CREATE VIEW harvest_info AS
             count(*) AS count
            FROM request
              JOIN record ON request.id = record.request
+           WHERE record.metadataPrefix='oai'
           GROUP BY request.endpoint_harvest) records ON endpoint_harvest.id = records.endpoint_harvest
   GROUP BY harvest.id
   ORDER BY harvest."when" DESC;

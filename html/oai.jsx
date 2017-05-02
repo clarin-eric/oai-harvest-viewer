@@ -1,13 +1,12 @@
 // OAI DreamFactory API
 var base = "http://localhost/api/v2/oai/_table/";
-var key = "ed4e8d16c129cd67c1f08653229f8f3960dc56da55b23736373a927b540712bc";
+var key = "00551c93af07a0e2c22628ad6214b9ab250cdfa82a5be2fc04789920e27a7170";
 var endPagesize = 10;
 var recPagesize = 1000;
 
 // endpoints
 var curationModule = "https://clarin.oeaw.ac.at/curate/#!ResultView/collection/";
 var logDir         = "file:///Users/menzowi/Documents/Projects/OAI/harvester/logs";
-
 
 // react-bootstrap imports
 var PageHeader = ReactBootstrap.PageHeader;
@@ -125,7 +124,7 @@ var Endpoints = React.createClass({
       f += "name LIKE '%"+filter.replace(/'/g,"''")+"%'";
     }
     $.ajax({
-      url: base + "endpoint?" + $.param({offset:offset, limit:endPagesize, include_count:true, filter:f, api_key:key, order:'name ASC', related:'harvest_by_endpoint_harvest,endpoint_harvest_by_endpoint'}),
+      url: base + "endpoint_info?" + $.param({offset:offset, limit:endPagesize, include_count:true, filter:f, api_key:key, order:'name ASC'}),
       dataType: 'json',
       cache: false,
       success: function(data) {
@@ -161,7 +160,7 @@ var Endpoints = React.createClass({
     var pages = Math.ceil(this.state.meta.count / endPagesize);
     var endpoints = this.state.data.map(function(endpoint) {
       return (
-        <Endpoint key={endpoint.id} id={endpoint.id} name={endpoint.name} location={endpoint.harvest_by_endpoint_harvest[0].location} type={endpoint.harvest_by_endpoint_harvest[0].type} url={endpoint.endpoint_harvest_by_endpoint[0].url}/>
+        <Endpoint key={endpoint.id} id={endpoint.id} name={endpoint.name} location={endpoint.location} type={endpoint.type} url={endpoint.url}/>
       );
     });
     var glyph = <Button onClick={this.handleFilter}>
