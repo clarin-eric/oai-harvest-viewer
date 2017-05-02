@@ -275,6 +275,10 @@ var EndpointInfo = React.createClass({
             </tr>;
     return <Table striped bordered condensed hover>
       <tbody>
+        <tr key="name">
+          <td>name</td>
+          <td>{this.props.name.replace(/_/g," ")}</td>
+        </tr>
         <tr key="check">
           <td>check</td>
           <td>
@@ -474,6 +478,10 @@ var RecordInfo = React.createClass({
     }.bind(null,this.props.location));
     return <Table striped bordered condensed hover>
       <tbody>
+        <tr key="identifier">
+          <td>identifier</td>
+          <td>{this.props.identifier}</td>
+        </tr>
         {reps}
       </tbody>
     </Table>;
