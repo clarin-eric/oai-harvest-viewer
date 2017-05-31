@@ -531,7 +531,7 @@ ALTER TABLE ONLY endpoint_harvest
 --
 
 ALTER TABLE ONLY record
-    ADD CONSTRAINT record_request FOREIGN KEY (request) REFERENCES request(id);
+    ADD CONSTRAINT record_request FOREIGN KEY (request) REFERENCES request(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
