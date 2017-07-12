@@ -263,14 +263,20 @@ CREATE VIEW endpoint_record WITH (security_barrier='false') AS
 ALTER TABLE endpoint_record OWNER TO oai;
 
 CREATE VIEW harvest_info AS
- SELECT harvest.id,
+ SELECT lh.id,
     COUNT(endpoint_harvest.endpoint) AS endpoints,
-    SUM(requests.count) AS requests,
-    SUM(records.count) AS records,
-    harvest."when",
-    harvest.type
-   FROM harvest
-     JOIN endpoint_harvest ON harvest.id = endpoint_harvest.harvest
+    COALESCE(SUM(requests.count),0) AS requests,
+    COALESCE(SUM(records.count),0) AS records,
+    lh."when",
+    lh."type"
+   FROM (
+    SELECT h.*
+    FROM "harvest" h                  -- 'h' from 'newest harvest in group'
+    LEFT JOIN "harvest" n             -- 'n' from 'newer harvest'
+        ON h."type" = n."type" AND h."when" < n."when"
+    WHERE n."when" is NULL
+   ) AS lh
+     LEFT JOIN endpoint_harvest ON lh.id = endpoint_harvest.harvest
      LEFT JOIN ( SELECT request.endpoint_harvest,
             count(*) AS count
            FROM request
@@ -279,10 +285,10 @@ CREATE VIEW harvest_info AS
             count(*) AS count
            FROM request
              JOIN record ON request.id = record.request
-           WHERE record.metadataPrefix='oai'
+           WHERE record."metadataPrefix"='oai'
           GROUP BY request.endpoint_harvest) records ON endpoint_harvest.id = records.endpoint_harvest
-  GROUP BY harvest.id
-  ORDER BY harvest."when" DESC;
+  GROUP BY lh.type, lh."when", lh.id
+  ORDER BY lh."when" DESC;
 
 ALTER TABLE harvest_info OWNER TO oai;
 
