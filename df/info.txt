@@ -1,0 +1,7 @@
+Welcome to the OAI viewer!
+==========================
+To complete the setup:
+- visit http://localhost/ in your browser and login as admin
+- install the OAI viewer app: php artisan dreamfactory:import-pkg /tmp/oai-app.zip
+- check it the http://localhost/api/v2/oai/_table/ endpoint works
+- hide the dreamfactory management API

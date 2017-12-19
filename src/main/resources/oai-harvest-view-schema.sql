@@ -227,16 +227,16 @@ CREATE VIEW endpoint_info AS
    FROM ((((endpoint
      JOIN endpoint_harvest ON ((endpoint.id = endpoint_harvest.endpoint)))
      JOIN harvest ON ((harvest.id = endpoint_harvest.harvest)))
-     LEFT JOIN ( SELECT request.endpoint_harvest,
+     LEFT JOIN ( SELECT endpoint_harvest,
             count(*) AS count
           FROM request
-          GROUP BY request.endpoint_harvest) requests ON ((endpoint_harvest.id = requests.endpoint_harvest)))
-     LEFT JOIN ( SELECT request.endpoint_harvest,
+          GROUP BY endpoint_harvest) requests ON ((endpoint_harvest.id = requests.endpoint_harvest)))
+     LEFT JOIN ( SELECT endpoint_harvest,
             count(*) AS count
           FROM (request
           JOIN record ON ((request.id = record.request)))
-﻿         WHERE record."metadataPrefix" = 'cmdi'
-          GROUP BY request.endpoint_harvest) records ON ((endpoint_harvest.id = records.endpoint_harvest)))
+﻿         WHERE "metadataPrefix" = 'cmdi'
+          GROUP BY endpoint_harvest) records ON ((endpoint_harvest.id = records.endpoint_harvest)))
   ORDER BY harvest."when" DESC;
 
 
