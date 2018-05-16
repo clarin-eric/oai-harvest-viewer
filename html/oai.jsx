@@ -6,7 +6,8 @@ var recPagesize = 1000;
 
 // endpoints
 var curationModule = "https://clarin.oeaw.ac.at/curate/#!ResultView/collection/";
-var logDir         = "file:///Users/menzowi/Documents/Projects/OAI/harvester/logs";
+var logDir         = "http://localhost/oai-harvest-result/log";
+var outDir         = "http://localhost/oai-harvest-result/output";
 
 // react-bootstrap imports
 var PageHeader = ReactBootstrap.PageHeader;
@@ -219,7 +220,7 @@ var Endpoint = React.createClass({
   handleClick: function(me) {
     $(ReactDOM.findDOMNode(this)).addClass('highlight').siblings().removeClass('highlight');
     ReactDOM.render(
-      <Records endpoint={this.props.id} location={this.props.location} />,
+      <Records endpoint={this.props.id} location={this.props.location} type={this.props.type}/>,
       document.getElementById('_records')
     );
     ReactDOM.render(
@@ -362,11 +363,11 @@ var Records = React.createClass({
     var filter = this.state.filter;
     var page = this.state.page;
     var pages = Math.ceil(this.state.meta.count / recPagesize);
-    var records = this.state.data.map(function(location,record) {
+    var records = this.state.data.map(function(type,location,record) {
       return (
-        <Record key={record.id} id={record.id} harvest={record.harvest} endpoint={record.endpoint} identifier={record.identifier} location={location}/>
+        <Record key={record.id} id={record.id} harvest={record.harvest} type={type} endpoint={record.endpoint} identifier={record.identifier} location={location}/>
       );
-    }.bind(null,this.props.location));
+    }.bind(null,this.props.type,this.props.location));
     var glyph = <Button onClick={this.handleFilter}>
       <Glyphicon glyph="filter" />
     </Button>;
@@ -422,7 +423,7 @@ var Record = React.createClass({
   handleClick: function(me) {
     $(ReactDOM.findDOMNode(this)).addClass('highlight').siblings().removeClass('highlight');
     ReactDOM.render(
-      <RecordInfo endpoint={this.props.endpoint} identifier={this.props.identifier} harvest={this.props.harvest} location={this.props.location}/>,
+      <RecordInfo endpoint={this.props.endpoint} identifier={this.props.identifier} harvest={this.props.harvest} type={this.props.type} location={this.props.location}/>,
       document.getElementById('_recordInfo')
     );
   },  
@@ -466,16 +467,16 @@ var RecordInfo = React.createClass({
       this.loadInfo(harvest,endpoint,identifier);
   },
   render: function() {
-    var reps = this.state.data.resource.map(function(location,resource) {
+    var reps = this.state.data.resource.map(function(type,resource) {
       return (
         <tr key={resource.metadataPrefix}>
           <td>{resource.metadataPrefix}</td>
           <td>
-            <a href={location+"/"+resource.location} target="oai">{(resource.metadataPrefix=='oai')?"request":"record"}</a>
+            <a href={outDir+"/"+type+"/"+resource.location} target="oai">{(resource.metadataPrefix=='oai')?"request":"record"}</a>
           </td>
         </tr>
       );
-    }.bind(null,this.props.location));
+    }.bind(null,this.props.type));
     return <Table striped bordered condensed hover>
       <tbody>
         <tr key="identifier">
