@@ -6,5 +6,5 @@ var recPagesize = 1000;
 
 // endpoints
 var curationModule = "https://clarin.oeaw.ac.at/curate/#!ResultView/collection/";
-var logDir         = "http://localhost/oai-harvest-result/log";
+//var logDir         = "http://localhost/oai-harvest-result/log";
 var outDir         = "http://localhost/oai-harvest-result/output";

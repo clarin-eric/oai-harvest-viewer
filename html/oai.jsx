@@ -260,7 +260,8 @@ var EndpointInfo = React.createClass({
       log = <tr key="log">
               <td>log</td>
               <td>
-                <a href={logDir+"/"+this.props.type+"-"+this.props.type+"/"+this.props.name+".log"} target="log">log file</a>
+                {/*<a href={logDir+"/"+this.props.type+"-"+this.props.type+"/"+this.props.name+".log"} target="log">log file</a>*/}
+                <a href={outDir+"/"+this.props.type+"/log/"+this.props.name+".log"} target="log">log file</a>
               </td>
             </tr>;
     return <Table striped bordered condensed hover>
