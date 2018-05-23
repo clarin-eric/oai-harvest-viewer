@@ -18,7 +18,7 @@ var Harvests = React.createClass({
   loadHarvests: function() {
     $(".harvests .highlight").removeClass("highlight");
     $.ajax({
-      url: base + "harvest_info?" + $.param({api_key:key, order:'type ASC'}),
+      url: base + "/harvest_info?" + $.param({api_key:key, order:'type ASC'}),
       dataType: 'json',
       cache: false,
       success: function(data) {
@@ -114,7 +114,7 @@ var Endpoints = React.createClass({
       f += "name LIKE '%"+filter.replace(/'/g,"''")+"%'";
     }
     $.ajax({
-      url: base + "endpoint_info?" + $.param({offset:offset, limit:endPagesize, include_count:true, filter:f, api_key:key, order:'name ASC'}),
+      url: base + "/endpoint_info?" + $.param({offset:offset, limit:endPagesize, include_count:true, filter:f, api_key:key, order:'name ASC'}),
       dataType: 'json',
       cache: false,
       success: function(data) {
@@ -232,7 +232,7 @@ var EndpointInfo = React.createClass({
   },
   loadInfo: function(endpoint) {
     $.ajax({
-      url: base + "endpoint_info?" + $.param({api_key:key, filter:"id="+endpoint}),
+      url: base + "/endpoint_info?" + $.param({api_key:key, filter:"id="+endpoint}),
       dataType: 'json',
       cache: false,
       success: function(data) {
@@ -256,11 +256,10 @@ var EndpointInfo = React.createClass({
   },
   render: function() {
     var log= "";
-    if (logDir != null)
+    if (outDir != null)
       log = <tr key="log">
               <td>log</td>
               <td>
-                {/*<a href={logDir+"/"+this.props.type+"-"+this.props.type+"/"+this.props.name+".log"} target="log">log file</a>*/}
                 <a href={outDir+"/"+this.props.type+"/log/"+this.props.name+".log"} target="log">log file</a>
               </td>
             </tr>;
@@ -317,7 +316,7 @@ var Records = React.createClass({
     if (filter != "")
       f = " AND (identifier LIKE '%"+filter.replace(/'/g,"''")+"%')";
     $.ajax({
-    url: base + "endpoint_record?" + $.param({offset:offset, limit:recPagesize, include_count:true, filter:"(metadataPrefix='cmdi') AND (endpoint="+endpoint+")"+f , api_key:key}),
+    url: base + "/endpoint_record?" + $.param({offset:offset, limit:recPagesize, include_count:true, filter:"(metadataPrefix='cmdi') AND (endpoint="+endpoint+")"+f , api_key:key}),
       dataType: 'json',
       cache: false,
       success: function(data) {
@@ -431,7 +430,7 @@ var RecordInfo = React.createClass({
   },
   loadInfo: function(harvest,endpoint,identifier) {
     $.ajax({
-      url: base + "endpoint_record?" + $.param({api_key:key, filter:"(harvest="+harvest+") AND (endpoint="+endpoint+") AND (identifier='"+identifier+"')"}),
+      url: base + "/endpoint_record?" + $.param({api_key:key, filter:"(harvest="+harvest+") AND (endpoint="+endpoint+") AND (identifier='"+identifier+"')"}),
       dataType: 'json',
       cache: false,
       success: function(data) {
