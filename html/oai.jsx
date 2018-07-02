@@ -81,7 +81,7 @@ var Harvest = React.createClass({
     );
   },
   render: function() {
-    return <tr key={this.props.id} onClick={this.handleClick}>
+    return <tr key={"h"+this.props.id} onClick={this.handleClick}>
       <td>{this.props.when}</td>
       <td>{this.props.type}</td>
       <td>{this.props.endpoints}</td>
@@ -218,7 +218,7 @@ var Endpoint = React.createClass({
     );
   },
   render: function() {
-    return <tr key={this.props.id} onClick={this.handleClick}>
+    return <tr key={"e"+this.props.id} onClick={this.handleClick}>
       <td>{this.props.name.replace(/_/g," ")}</td>
       <td>{this.props.type}</td>
     </tr>
@@ -417,7 +417,7 @@ var Record = React.createClass({
     );
   },  
   render: function() {
-    return <tr key={this.props.id} onClick={this.handleClick}>
+    return <tr key={"r"+this.props.id} onClick={this.handleClick}>
       <td>{this.props.identifier}</td>
     </tr>
   }
