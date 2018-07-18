@@ -38,7 +38,7 @@ var Harvests = React.createClass({
   render: function() {
     var harvests = this.state.data.map(function(harvest) {
       return (
-        <Harvest key={harvest.id} id={harvest.id} type={harvest.type} when={harvest.when} endpoints={harvest.endpoints} requests={harvest.requests} records={harvest.records}/>
+        <Harvest key={"h"+harvest.id} id={harvest.id} type={harvest.type} when={harvest.when} endpoints={harvest.endpoints} requests={harvest.requests} records={harvest.records}/>
       );
     });
     return <div>
@@ -150,7 +150,7 @@ var Endpoints = React.createClass({
     var pages = Math.ceil(this.state.meta.count / endPagesize);
     var endpoints = this.state.data.map(function(endpoint) {
       return (
-        <Endpoint key={endpoint.id} id={endpoint.id} name={endpoint.name} location={endpoint.location} type={endpoint.type} url={endpoint.url}/>
+        <Endpoint key={"e"+endpoint.id} id={endpoint.id} name={endpoint.name} location={endpoint.location} type={endpoint.type} url={endpoint.url}/>
       );
     });
     var glyph = <Button onClick={this.handleFilter}>
@@ -354,7 +354,7 @@ var Records = React.createClass({
     var pages = Math.ceil(this.state.meta.count / recPagesize);
     var records = this.state.data.map(function(type,location,record) {
       return (
-        <Record key={record.id} id={record.id} harvest={record.harvest} type={type} endpoint={record.endpoint} identifier={record.identifier} location={location}/>
+        <Record key={"r"+record.id} id={record.id} harvest={record.harvest} type={type} endpoint={record.endpoint} identifier={record.identifier} location={location}/>
       );
     }.bind(null,this.props.type,this.props.location));
     var glyph = <Button onClick={this.handleFilter}>
