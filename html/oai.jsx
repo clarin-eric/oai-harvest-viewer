@@ -25,8 +25,8 @@ var Harvests = React.createClass({
         this.setState({data: data.resource});
       }.bind(this),
       error: function(xhr, status, err) {
-        console.error(this.props.url, status, err.toString());
-      }.bind(this)
+        console.log(this.url, status, err.toString());
+      }
     });
   },
   componentDidMount: function() {
@@ -111,7 +111,7 @@ var Endpoints = React.createClass({
     if (filter != "") {
       if (f != "")
         f += " AND ";
-      f += "name LIKE '%"+filter.replace(/'/g,"''")+"%'";
+      f += "(name LIKE '%"+filter.replace(/'/g,"''")+"%')";
     }
     $.ajax({
       url: base + "/endpoint_info?" + $.param({offset:offset, limit:endPagesize, include_count:true, filter:f, api_key:key, order:'name ASC'}),
@@ -121,8 +121,8 @@ var Endpoints = React.createClass({
         this.setState({data: data.resource, meta:data.meta, page:page, filter:filter});
       }.bind(this),
       error: function(xhr, status, err) {
-        console.error(this.props.url, status, err.toString());
-      }.bind(this)
+        console.log(this.url, status, err.toString());
+      }
     });
   },
   componentDidMount: function() {
@@ -239,8 +239,8 @@ var EndpointInfo = React.createClass({
         this.setState({data: data.resource[0]});
       }.bind(this),
       error: function(xhr, status, err) {
-        console.error(this.props.url, status, err.toString());
-      }.bind(this)
+        console.log(this.url, status, err.toString());
+      }
     });
   },
   componentDidMount: function() {
@@ -323,8 +323,8 @@ var Records = React.createClass({
         this.setState({data:data.resource, meta:data.meta, page:page, endpoint:endpoint, filter:filter});
       }.bind(this),
       error: function(xhr, status, err) {
-        console.error(this.props.url, status, err.toString());
-      }.bind(this)
+        console.log(this.url, status, err.toString());
+      }
     });
   },
   componentDidMount: function() {
@@ -437,8 +437,8 @@ var RecordInfo = React.createClass({
         this.setState({data: data});
       }.bind(this),
       error: function(xhr, status, err) {
-        console.error(this.props.url, status, err.toString());
-      }.bind(this)
+        console.log(this.url, status, err.toString());
+      }
     });
   },
   componentDidMount: function() {
