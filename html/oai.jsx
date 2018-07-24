@@ -126,7 +126,10 @@ var Endpoints = React.createClass({
     });
   },
   componentDidMount: function() {
-    this.loadEndpoints(1,'');
+    var harvest = this.props.harvest;
+    if (harvest) {
+      this.loadEndpoints(1,'',harvest);
+    }
   },
   componentWillReceiveProps: function (nextProps) {
     var harvest = nextProps.harvest;
@@ -150,7 +153,7 @@ var Endpoints = React.createClass({
     var pages = Math.ceil(this.state.meta.count / endPagesize);
     var endpoints = this.state.data.map(function(endpoint) {
       return (
-        <Endpoint key={"e"+endpoint.id} id={endpoint.id} name={endpoint.name} location={endpoint.location} type={endpoint.type} url={endpoint.url}/>
+        <Endpoint key={"e"+endpoint.id} id={endpoint.id} harvest={endpoint.harvest} name={endpoint.name} location={endpoint.location} type={endpoint.type} url={endpoint.url}/>
       );
     });
     var glyph = <Button onClick={this.handleFilter}>
@@ -209,7 +212,7 @@ var Endpoint = React.createClass({
   handleClick: function(me) {
     $(ReactDOM.findDOMNode(this)).addClass('highlight').siblings().removeClass('highlight');
     ReactDOM.render(
-      <Records endpoint={this.props.id} location={this.props.location} type={this.props.type}/>,
+      <Records endpoint={this.props.id} harvest={this.props.harvest} location={this.props.location} type={this.props.type}/>,
       document.getElementById('_records')
     );
     ReactDOM.render(
@@ -302,9 +305,9 @@ var EndpointInfo = React.createClass({
 // A list of Records
 var Records = React.createClass({
   getInitialState: function() {
-    return {data: [], meta: {count:0}, page:1, endpoint:0, filter:""};
+    return {data: [], meta: {count:0}, page:1, endpoint:0, harvest:0, filter:""};
   },
-  loadRecords: function(endpoint,page,filter) {
+  loadRecords: function(endpoint,harvest,page,filter) {
     $(".records .highlight").removeClass("highlight");
     if (page == null)
       page = 1;
@@ -312,15 +315,16 @@ var Records = React.createClass({
       filter = this.state.filter;
     var offset = (page - 1) * recPagesize;
     this.state.endpoint = endpoint;
+    this.state.harvest = harvest;
     var f = "";
     if (filter != "")
       f = " AND (identifier LIKE '%"+filter.replace(/'/g,"''")+"%')";
     $.ajax({
-    url: base + "/endpoint_record?" + $.param({offset:offset, limit:recPagesize, include_count:true, filter:"(metadataPrefix='cmdi') AND (endpoint="+endpoint+")"+f , api_key:key}),
+    url: base + "/endpoint_record?" + $.param({offset:offset, limit:recPagesize, include_count:true, filter:"(metadataPrefix='cmdi') AND (endpoint="+endpoint+") AND (harvest="+harvest+")"+f , api_key:key}),
       dataType: 'json',
       cache: false,
       success: function(data) {
-        this.setState({data:data.resource, meta:data.meta, page:page, endpoint:endpoint, filter:filter});
+        this.setState({data:data.resource, meta:data.meta, page:page, endpoint:endpoint, harvest:harvest, filter:filter});
       }.bind(this),
       error: function(xhr, status, err) {
         console.log(this.url, status, err.toString());
@@ -329,21 +333,23 @@ var Records = React.createClass({
   },
   componentDidMount: function() {
     var endpoint = this.props.endpoint;
-    if (endpoint)
-      this.loadRecords(endpoint);
+    var harvest = this.props.harvest;
+    if (endpoint && harvest)
+      this.loadRecords(endpoint,harvest);
   },
   componentWillReceiveProps: function (nextProps) {
     var endpoint = nextProps.endpoint;
-    if (endpoint) {
-      this.loadRecords(endpoint,1,'');
+    var harvest = nextProps.harvest;
+    if (endpoint && harvest) {
+      this.loadRecords(endpoint,harvest,1,'');
     }
   },
   handleSelect: function (event, selectedEvent) {
     var page = selectedEvent.eventKey;
-    this.loadRecords(this.state.endpoint,page);
+    this.loadRecords(this.state.endpoint,this.state.harvest,page);
   },
   handleFilter: function () {
-    this.loadRecords(this.state.endpoint,1,this.refs.filterRecords.getValue());
+    this.loadRecords(this.state.endpoint,this.state.harvest,1,this.refs.filterRecords.getValue());
   },
   handleChange: function() {
     this.setState({filter:this.refs.filterRecords.getValue()});
