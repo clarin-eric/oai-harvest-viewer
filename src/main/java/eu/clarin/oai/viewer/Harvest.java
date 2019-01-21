@@ -73,6 +73,10 @@ public class Harvest {
         System.out.format("SELECT link_record(currval('harvest_id_seq'::regclass));%n");
         // end transaction
         System.out.format("COMMIT;%n");
+        // refresh materialized views
+        System.out.format("REFRESH MATERIALIZED VIEW public.mv_endpoint_info;%n");
+        System.out.format("REFRESH MATERIALIZED VIEW public.mv_endpoint_record;%n");
+        System.out.format("REFRESH MATERIALIZED VIEW public.mv_harvest_info;%n");
         return true;
     }
     

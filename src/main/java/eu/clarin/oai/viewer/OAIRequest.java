@@ -182,7 +182,7 @@ public class OAIRequest {
                                 String when = xmlr.getText();
                                 try {
                                     Date w = xsd.parse(when);
-                                    System.out.format("UPDATE request SET \"when\" = TIMESTAMP WITH TIME ZONE '%s' WHERE id = currval('request_id_seq'::regclass);%n", when);
+                                    System.out.format("UPDATE request SET \"when\" = TIMESTAMP WITH TIME ZONE '%s' WHERE id = (select currval('request_id_seq'::regclass));%n", when);
                                 } catch(ParseException x) {
                                     System.err.println("-- WRN: skipped faulty date["+when+"] in OAI Request["+request+"]");
                                 }
@@ -204,7 +204,7 @@ public class OAIRequest {
                                     url = uri;
                                 if (!params.equals(""))
                                     uri += "?"+params;
-                                System.out.format("UPDATE request SET url = '%s' WHERE id = currval('request_id_seq'::regclass);%n", uri);
+                                System.out.format("UPDATE request SET url = '%s' WHERE id = (select currval('request_id_seq'::regclass));%n", uri);
                                 break;
                             case XMLEvent2.END_ELEMENT:
                                 if (depth==sdepth && qn.getNamespaceURI().equals(OAI_NS) && qn.getLocalPart().equals("request")) {
