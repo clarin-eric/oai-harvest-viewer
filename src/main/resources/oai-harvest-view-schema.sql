@@ -1,4 +1,5 @@
 CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 -- TABLE: endpoint
 
@@ -211,6 +212,7 @@ CREATE MATERIALIZED VIEW public.mv_endpoint_info AS
     harvest."when",
     harvest.type,
     harvest.id AS harvest,
+    LOWER(endpoint.name) AS name_lower,
     endpoint.name,
     endpoint_harvest.location,
     endpoint_harvest.url
@@ -236,10 +238,15 @@ CREATE VIEW public.endpoint_info AS
 
 ALTER TABLE public.endpoint_info OWNER TO oai;
 
+-- - index
+
+CREATE INDEX idx_endpoint_info_name_lower ON public.mv_endpoint_info USING gin (name_lower gin_trgm_ops);
+
 -- VIEW: endpoint_record
 
 CREATE MATERIALIZED VIEW public.mv_endpoint_record AS
  SELECT record.id,
+    LOWER(record.identifier) AS identifier_lower,
     record.identifier,
     record."metadataPrefix",
     record.location,
@@ -256,6 +263,10 @@ CREATE VIEW public.endpoint_record AS
     SELECT * FROM public.mv_endpoint_record;
 
 ALTER TABLE public.endpoint_record OWNER TO oai;
+
+-- - index
+
+CREATE INDEX idx_mv_endpoint_record_identifier_lower ON public.mv_endpoint_record USING gin (identifier_lower gin_trgm_ops);
 
 -- VIEW: harvest_info
 

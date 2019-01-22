@@ -111,7 +111,7 @@ var Endpoints = React.createClass({
     if (filter != "") {
       if (f != "")
         f += " AND ";
-      f += "(name LIKE '%"+filter.replace(/'/g,"''")+"%')";
+      f += "(name_lower LIKE '%"+filter.replace(/'/g,"''").toLowerCase()+"%')";
     }
     $.ajax({
       url: base + "/endpoint_info?" + $.param({offset:offset, limit:endPagesize, include_count:true, filter:f, api_key:key, order:'name ASC'}),
@@ -318,7 +318,7 @@ var Records = React.createClass({
     this.state.harvest = harvest;
     var f = "";
     if (filter != "")
-      f = " AND (identifier LIKE '%"+filter.replace(/'/g,"''")+"%')";
+      f = " AND (identifier_lower LIKE '%"+filter.replace(/'/g,"''").toLowerCase()+"%')";
     $.ajax({
     url: base + "/endpoint_record?" + $.param({offset:offset, limit:recPagesize, include_count:true, filter:"(metadataPrefix='cmdi') AND (endpoint="+endpoint+") AND (harvest="+harvest+")"+f , api_key:key}),
       dataType: 'json',
