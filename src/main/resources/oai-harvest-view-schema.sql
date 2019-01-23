@@ -323,9 +323,9 @@ $$;
 
 ALTER FUNCTION public.insert_endpoint(name character varying) OWNER TO oai;
 
--- FUNCTION: link_record
+-- FUNCTION: link_harvest_records
 
-CREATE FUNCTION public.link_record(hid bigint) RETURNS void
+CREATE FUNCTION public.link_harvest_records(hid bigint) RETURNS void
     LANGUAGE plpgsql
     AS $$
 BEGIN
@@ -347,4 +347,22 @@ BEGIN
 END;
 $$;
 
-ALTER FUNCTION public.link_record(hid bigint) OWNER TO oai;
+ALTER FUNCTION public.link_harvest_records(hid bigint) OWNER TO oai;
+
+-- FUNCTION: check_harvests
+
+CREATE FUNCTION public.check_harvests() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    cnt bigint;
+BEGIN
+    cnt := (SELECT COUNT(*) FROM record WHERE identifier IS NULL) ;
+
+    IF (cnt > 0) THEN
+        RAISE WARNING '[%] record(s) without identifier!', cnt;
+    END IF;
+END;
+$$;
+
+ALTER FUNCTION public.check_harvests() OWNER TO oai;
