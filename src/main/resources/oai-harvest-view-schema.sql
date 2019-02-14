@@ -33,6 +33,10 @@ ALTER TABLE ONLY public.endpoint
 ALTER TABLE ONLY public.endpoint
     ADD CONSTRAINT unique_endpoint_name UNIQUE (name);
 
+-- - index
+
+CREATE INDEX idx_endpoint_name ON public.endpoint USING btree (name);
+
 -- TABLE: harvest
 
 CREATE TABLE public.harvest (
@@ -202,6 +206,11 @@ CREATE INDEX fki_record_request ON public.record USING btree (request);
 
 ALTER TABLE ONLY public.record
     ADD CONSTRAINT record_request FOREIGN KEY (request) REFERENCES public.request(id);
+
+-- - index
+
+CREATE INDEX idx_record_metadataPrefix ON public.record USING btree ("metadataPrefix");
+CREATE INDEX idx_record_alfanum ON public.record USING btree (alfanum);
 
 -- VIEW: endpoint_info
 
