@@ -207,10 +207,11 @@ CREATE INDEX fki_record_request ON public.record USING btree (request);
 ALTER TABLE ONLY public.record
     ADD CONSTRAINT record_request FOREIGN KEY (request) REFERENCES public.request(id);
 
--- - index
+-- - indices
 
 CREATE INDEX idx_record_metadataPrefix ON public.record USING btree ("metadataPrefix");
 CREATE INDEX idx_record_alfanum ON public.record USING btree (alfanum);
+CREATE INDEX idx_record_endpoint_name ON public.record USING btree (endpoint_name);
 
 -- VIEW: endpoint_info
 
