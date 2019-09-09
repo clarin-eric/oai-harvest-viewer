@@ -252,32 +252,6 @@ ALTER TABLE public.endpoint_info OWNER TO oai;
 
 CREATE INDEX idx_endpoint_info_name_lower ON public.mv_endpoint_info USING gin (name_lower gin_trgm_ops);
 
--- VIEW: endpoint_record
-
-CREATE MATERIALIZED VIEW public.mv_endpoint_record AS
- SELECT record.id,
-    LOWER(record.identifier) AS identifier_lower,
-    record.identifier,
-    record."metadataPrefix",
-    record.location,
-    request.id AS request,
-    endpoint_harvest.endpoint,
-    endpoint_harvest.harvest
-   FROM ((public.record
-     JOIN public.request ON ((record.request = request.id)))
-     JOIN public.endpoint_harvest ON ((request.endpoint_harvest = endpoint_harvest.id)));
-
-ALTER TABLE public.mv_endpoint_record OWNER TO oai;
-
-CREATE VIEW public.endpoint_record AS
-    SELECT * FROM public.mv_endpoint_record;
-
-ALTER TABLE public.endpoint_record OWNER TO oai;
-
--- - index
-
-CREATE INDEX idx_mv_endpoint_record_identifier_lower ON public.mv_endpoint_record USING gin (identifier_lower gin_trgm_ops);
-
 -- VIEW: harvest_info
 
 CREATE MATERIALIZED VIEW public.mv_harvest_info AS
@@ -314,6 +288,34 @@ CREATE VIEW public.harvest_info AS
     SELECT * FROM public.mv_harvest_info;
 
 ALTER TABLE public.harvest_info OWNER TO oai;
+		
+-- VIEW: endpoint_record
+
+CREATE MATERIALIZED VIEW public.mv_endpoint_record AS
+ SELECT record.id,
+    LOWER(record.identifier) AS identifier_lower,
+    record.identifier,
+    record."metadataPrefix",
+    record.location,
+    request.id AS request,
+    endpoint_harvest.endpoint,
+    endpoint_harvest.harvest
+    FROM ((public.record
+        JOIN public.request ON ((record.request = request.id))) 
+        JOIN public.endpoint_harvest ON ((request.endpoint_harvest = endpoint_harvest.id))
+        JOIN public.harvest ON ((endpoint_harvest.harvest = harvest.id))
+        JOIN public.harvest_info ON ((harvest.id = harvest_info.id)));
+		
+ALTER TABLE public.mv_endpoint_record OWNER TO oai;
+
+CREATE VIEW public.endpoint_record AS
+    SELECT * FROM public.mv_endpoint_record;
+
+ALTER TABLE public.endpoint_record OWNER TO oai;
+
+-- - index
+
+CREATE INDEX idx_mv_endpoint_record_identifier_lower ON public.mv_endpoint_record USING gin (identifier_lower gin_trgm_ops);
 
 -- FUNCTION: insert_endpoint
 -- TODO: replace by UPSERT
