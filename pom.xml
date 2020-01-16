@@ -15,13 +15,13 @@
         <dependency>
             <groupId>org.codehaus.woodstox</groupId>
             <artifactId>woodstox-core-asl</artifactId>
-            <version>4.1.3</version>
+            <version>4.2.0</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.1.3</version>
+            <version>1.2.0</version>
         </dependency>
         <!-- TrueVFS -->
         <dependency>
@@ -65,7 +65,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <!-- versions of dependencies -->
-        <truevfs.version>0.11.0</truevfs.version>
+        <truevfs.version>0.12.1</truevfs.version>
         <truecommons.version>2.5.0</truecommons.version>
     </properties>
     <build>
