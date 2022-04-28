@@ -65,7 +65,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <!-- versions of dependencies -->
-        <truevfs.version>0.12.2</truevfs.version>
+        <truevfs.version>0.14.0</truevfs.version>
         <truevfs.scalaTarget>2.13</truevfs.scalaTarget>
         <truecommons.version>2.5.0</truecommons.version>
     </properties>
