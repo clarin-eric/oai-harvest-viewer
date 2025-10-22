@@ -45,6 +45,9 @@ public class OAIVisitor extends SimpleFileVisitor<Path> {
 
     @Override
     public FileVisitResult visitFile(Path file,BasicFileAttributes attr) {
+        if(file.toString().contains("DS_Store")) {
+            return CONTINUE;
+        }
         System.err.format("-- OAI Request: %s%n", file);
         Path loc = harvest.getDirectory().relativize(file);
         System.out.format("INSERT INTO request(endpoint_harvest,location) VALUES(currval('endpoint_harvest_id_seq'::regclass),'%s');%n",loc);
