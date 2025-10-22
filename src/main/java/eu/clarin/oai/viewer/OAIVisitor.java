@@ -45,7 +45,7 @@ public class OAIVisitor extends SimpleFileVisitor<Path> {
 
     @Override
     public FileVisitResult visitFile(Path file,BasicFileAttributes attr) {
-        if(file.toString().contains("DS_Store")) {
+        if (file.toString().contains("DS_Store")) {
             return CONTINUE;
         }
         System.err.format("-- OAI Request: %s%n", file);

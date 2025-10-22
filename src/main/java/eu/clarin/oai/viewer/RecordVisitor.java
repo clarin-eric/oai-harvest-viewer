@@ -35,6 +35,9 @@ public class RecordVisitor extends SimpleFileVisitor<Path> {
 
     @Override
     public FileVisitResult visitFile(Path file,BasicFileAttributes attr) {
+        if (file.toString().contains("DS_Store")) {
+            return CONTINUE;
+        }
         if (records == 0)
             System.out.format("INSERT INTO \"record\"(\"metadataPrefix\",location,endpoint_name,alfanum) VALUES %n");
         else
