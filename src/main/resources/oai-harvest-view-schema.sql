@@ -4,7 +4,7 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 -- TABLE: endpoint
 
 CREATE TABLE public.endpoint (
-    id integer NOT NULL,
+    id bigint NOT NULL,
     name text
 );
 
@@ -40,7 +40,7 @@ CREATE INDEX idx_endpoint_name ON public.endpoint USING btree (name);
 -- TABLE: harvest
 
 CREATE TABLE public.harvest (
-    id integer NOT NULL,
+    id bigint NOT NULL,
     "when" timestamp with time zone DEFAULT now(),
     location text,
     type text
@@ -74,10 +74,10 @@ ALTER TABLE ONLY public.harvest
 -- TABLE: endpoint_harvest
 
 CREATE TABLE public.endpoint_harvest (
-    id integer NOT NULL,
+    id bigint NOT NULL,
     location text,
-    harvest integer,
-    endpoint integer,
+    harvest bigint,
+    endpoint bigint,
     url text
 );
 
@@ -121,8 +121,8 @@ ALTER TABLE ONLY public.endpoint_harvest
 -- TABLE: request
 
 CREATE TABLE public.request (
-    id integer NOT NULL,
-    endpoint_harvest integer,
+    id bigint NOT NULL,
+    endpoint_harvest bigint,
     location text,
     url text,
     "when" timestamp with time zone
@@ -163,12 +163,12 @@ ALTER TABLE ONLY public.request
 -- TABLE: record
 
 CREATE TABLE public.record (
-    id integer NOT NULL,
+    id bigint NOT NULL,
     identifier text,
     alfanum text,
     "metadataPrefix" text,
     location text,
-    request integer,
+    request bigint,
     endpoint_name text
 );
 
@@ -249,6 +249,13 @@ ALTER TABLE ONLY public.table_endpoint_info ALTER COLUMN id SET DEFAULT nextval(
 ALTER TABLE ONLY public.table_endpoint_info
     ADD CONSTRAINT key_table_endpoint_info PRIMARY KEY (id);
 
+-- - foreign key
+
+CREATE INDEX fki_endpoint_info ON public.table_endpoint_info USING btree (endpoint);
+
+ALTER TABLE ONLY public.table_endpoint_info
+    ADD CONSTRAINT endpoint_table_endpoint_info FOREIGN KEY (endpoint_id) REFERENCES public.endpoint(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
 -- - index
 -- Do we need this?
 -- CREATE INDEX idx_endpoint_info_name_lower ON public.mv_endpoint_info USING gin (name_lower gin_trgm_ops);
@@ -258,7 +265,7 @@ ALTER TABLE ONLY public.table_endpoint_info
 CREATE TABLE public.table_harvest_info (
     id bigint,
     endpoint_id bigint,
-    endpoints bigint,
+    endpoints numeric,
     requests numeric,
     records numeric,
     "when" timestamp with time zone,
@@ -284,6 +291,14 @@ ALTER TABLE ONLY public.table_harvest_info ALTER COLUMN id SET DEFAULT nextval('
 
 ALTER TABLE ONLY public.table_harvest_info
     ADD CONSTRAINT key_table_harvest_info PRIMARY KEY (id);
+
+-- - foreign key
+
+CREATE INDEX fki_table_harvest_info ON public.table_harvest_info USING btree (endpoint);
+
+ALTER TABLE ONLY public.table_harvest_info
+    ADD CONSTRAINT endpoint_table_harvest_info FOREIGN KEY (endpoint_id) REFERENCES public.endpoint(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
 		
 -- VIEW: endpoint_record
 
