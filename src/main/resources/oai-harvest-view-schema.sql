@@ -397,7 +397,7 @@ CREATE FUNCTION public.insert_endpoint_info() RETURNS void
     LANGUAGE plpgsql
     AS $$
 BEGIN
-  INSERT INTO table_endpoint_info
+    INSERT INTO table_endpoint_info (endpoint_id, requests, records, "when", type, harvest, name_lower, name, location, url)
     SELECT endpoint.id,
       COALESCE(requests.count, (0)::bigint) AS requests,
       COALESCE(records.count, (0)::bigint) AS records,
@@ -433,7 +433,7 @@ CREATE FUNCTION public.insert_harvest_info() RETURNS void
     LANGUAGE plpgsql
     AS $$
 BEGIN
-  INSERT INTO table_harvest_info
+  INSERT INTO table_harvest_info (endpoint_id, endpoints, requests, records, "when", type)
     SELECT lh.id,
       count(endpoint_harvest.endpoint) AS endpoints,
       COALESCE(sum(requests.count), (0)::numeric) AS requests,
