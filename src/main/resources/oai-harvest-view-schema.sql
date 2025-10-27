@@ -213,81 +213,77 @@ CREATE INDEX idx_record_metadataPrefix ON public.record USING btree ("metadataPr
 CREATE INDEX idx_record_alfanum ON public.record USING btree (alfanum);
 CREATE INDEX idx_record_endpoint_name ON public.record USING btree (endpoint_name);
 
--- VIEW: endpoint_info
+-- Name:  table_endpoint_info
 
-CREATE MATERIALIZED VIEW public.mv_endpoint_info AS
- SELECT endpoint.id,
-    COALESCE(requests.count, (0)::bigint) AS requests,
-    COALESCE(records.count, (0)::bigint) AS records,
-    harvest."when",
-    harvest.type,
-    harvest.id AS harvest,
-    LOWER(endpoint.name) AS name_lower,
-    endpoint.name,
-    endpoint_harvest.location,
-    endpoint_harvest.url
-   FROM ((((public.endpoint
-     JOIN public.endpoint_harvest ON ((endpoint.id = endpoint_harvest.endpoint)))
-     JOIN public.harvest ON ((harvest.id = endpoint_harvest.harvest)))
-     LEFT JOIN ( SELECT request.endpoint_harvest,
-            count(*) AS count
-           FROM public.request
-          GROUP BY request.endpoint_harvest) requests ON ((endpoint_harvest.id = requests.endpoint_harvest)))
-     LEFT JOIN ( SELECT request.endpoint_harvest,
-            count(*) AS count
-           FROM (public.request
-             JOIN public.record ON ((request.id = record.request)))
-          WHERE (record."metadataPrefix" = 'cmdi'::text)
-          GROUP BY request.endpoint_harvest) records ON ((endpoint_harvest.id = records.endpoint_harvest)))
-  ORDER BY harvest."when" DESC;
+CREATE TABLE public.table_endpoint_info (
+    id bigint,
+    endpoint_id bigint,
+    requests bigint,
+    records bigint,
+    "when" timestamp with time zone,
+    type text,
+    harvest bigint,
+    name_lower text,
+    name text,
+    location text,
+    url text
+);
 
-ALTER TABLE public.mv_endpoint_info OWNER TO oai;
+ALTER TABLE public.table_endpoint_info OWNER TO oai;
 
-CREATE VIEW public.endpoint_info AS
-    SELECT * FROM public.mv_endpoint_info;
+-- - primary key
 
-ALTER TABLE public.endpoint_info OWNER TO oai;
+CREATE SEQUENCE public.table_endpoint_info_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER TABLE public.table_endpoint_info_id_seq OWNER TO oai;
+
+ALTER SEQUENCE public.table_endpoint_info_id_seq OWNED BY public.table_endpoint_info.id;
+
+ALTER TABLE ONLY public.table_endpoint_info ALTER COLUMN id SET DEFAULT nextval('public.table_endpoint_info_id_seq'::regclass);
+
+ALTER TABLE ONLY public.table_endpoint_info
+    ADD CONSTRAINT key_table_endpoint_info PRIMARY KEY (id);
 
 -- - index
+-- Do we need this?
+-- CREATE INDEX idx_endpoint_info_name_lower ON public.mv_endpoint_info USING gin (name_lower gin_trgm_ops);
 
-CREATE INDEX idx_endpoint_info_name_lower ON public.mv_endpoint_info USING gin (name_lower gin_trgm_ops);
+-- Name: table_harvest_info
 
--- VIEW: harvest_info
+CREATE TABLE public.table_harvest_info (
+    id bigint,
+    endpoint_id bigint,
+    endpoints bigint,
+    requests numeric,
+    records numeric,
+    "when" timestamp with time zone,
+    type text
+);
 
-CREATE MATERIALIZED VIEW public.mv_harvest_info AS
- SELECT lh.id,
-    count(endpoint_harvest.endpoint) AS endpoints,
-    COALESCE(sum(requests.count), (0)::numeric) AS requests,
-    COALESCE(sum(records.count), (0)::numeric) AS records,
-    lh."when",
-    lh.type
-   FROM (((( SELECT h.id,
-            h."when",
-            h.location,
-            h.type
-           FROM (public.harvest h
-             LEFT JOIN public.harvest n ON (((h.type = n.type) AND (h."when" < n."when"))))
-          WHERE (n."when" IS NULL)) lh
-     LEFT JOIN public.endpoint_harvest ON ((lh.id = endpoint_harvest.harvest)))
-     LEFT JOIN ( SELECT request.endpoint_harvest,
-            count(*) AS count
-           FROM public.request
-          GROUP BY request.endpoint_harvest) requests ON ((endpoint_harvest.id = requests.endpoint_harvest)))
-     LEFT JOIN ( SELECT request.endpoint_harvest,
-            count(*) AS count
-           FROM (public.request
-             JOIN public.record ON ((request.id = record.request)))
-          WHERE (record."metadataPrefix" = 'oai'::text)
-          GROUP BY request.endpoint_harvest) records ON ((endpoint_harvest.id = records.endpoint_harvest)))
-  GROUP BY lh.id, lh.type, lh."when"
-  ORDER BY lh."when" DESC;
+ALTER TABLE public.table_harvest_info OWNER TO oai;
 
-ALTER TABLE public.mv_harvest_info OWNER TO oai;
+-- - primary key
 
-CREATE VIEW public.harvest_info AS
-    SELECT * FROM public.mv_harvest_info;
+CREATE SEQUENCE public.table_harvest_info_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
 
-ALTER TABLE public.harvest_info OWNER TO oai;
+ALTER TABLE public.table_harvest_info_id_seq OWNER TO oai;
+
+ALTER SEQUENCE public.table_harvest_info_id_seq OWNED BY public.table_harvest_info.id;
+
+ALTER TABLE ONLY public.table_harvest_info ALTER COLUMN id SET DEFAULT nextval('public.table_harvest_info_id_seq'::regclass);
+
+ALTER TABLE ONLY public.table_harvest_info
+    ADD CONSTRAINT key_table_harvest_info PRIMARY KEY (id);
 		
 -- VIEW: endpoint_record
 
@@ -304,7 +300,7 @@ CREATE MATERIALIZED VIEW public.mv_endpoint_record AS
         JOIN public.request ON ((record.request = request.id))) 
         JOIN public.endpoint_harvest ON ((request.endpoint_harvest = endpoint_harvest.id))
         JOIN public.harvest ON ((endpoint_harvest.harvest = harvest.id))
-        JOIN public.harvest_info ON ((harvest.id = harvest_info.id)));
+        JOIN public.table_harvest_info ON ((harvest.id = table_harvest_info.id)));
 		
 ALTER TABLE public.mv_endpoint_record OWNER TO oai;
 
