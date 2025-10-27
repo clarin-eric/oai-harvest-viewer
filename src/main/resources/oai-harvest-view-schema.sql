@@ -251,7 +251,7 @@ ALTER TABLE ONLY public.table_endpoint_info
 
 -- - foreign key
 
-CREATE INDEX fki_endpoint_info ON public.table_endpoint_info USING btree (endpoint);
+CREATE INDEX fki_endpoint_info ON public.table_endpoint_info USING btree (endpoint_id);
 
 ALTER TABLE ONLY public.table_endpoint_info
     ADD CONSTRAINT endpoint_table_endpoint_info FOREIGN KEY (endpoint_id) REFERENCES public.endpoint(id) ON UPDATE CASCADE ON DELETE CASCADE;
@@ -294,7 +294,7 @@ ALTER TABLE ONLY public.table_harvest_info
 
 -- - foreign key
 
-CREATE INDEX fki_table_harvest_info ON public.table_harvest_info USING btree (endpoint);
+CREATE INDEX fki_table_harvest_info ON public.table_harvest_info USING btree (endpoint_id);
 
 ALTER TABLE ONLY public.table_harvest_info
     ADD CONSTRAINT endpoint_table_harvest_info FOREIGN KEY (endpoint_id) REFERENCES public.endpoint(id) ON UPDATE CASCADE ON DELETE CASCADE;
@@ -389,3 +389,79 @@ END;
 $$;
 
 ALTER FUNCTION public.check_harvests() OWNER TO oai;
+
+
+-- Function: insert latest harvest into table_endpoint_info
+
+CREATE FUNCTION public.insert_endpoint_info() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO table_endpoint_info
+    SELECT endpoint.id,
+      COALESCE(requests.count, (0)::bigint) AS requests,
+      COALESCE(records.count, (0)::bigint) AS records,
+      harvest."when",
+      harvest.type,
+      harvest.id AS harvest,
+      LOWER(endpoint.name) AS name_lower,
+      endpoint.name,
+      endpoint_harvest.location,
+      endpoint_harvest.url
+    FROM ((((public.endpoint
+      JOIN public.endpoint_harvest ON ((endpoint.id = endpoint_harvest.endpoint)))
+      JOIN public.harvest ON ((harvest.id = endpoint_harvest.harvest)))
+      LEFT JOIN ( SELECT request.endpoint_harvest,
+              count(*) AS count
+            FROM public.request
+            GROUP BY request.endpoint_harvest) requests ON ((endpoint_harvest.id = requests.endpoint_harvest)))
+      LEFT JOIN ( SELECT request.endpoint_harvest,
+              count(*) AS count
+            FROM (public.request
+              JOIN public.record ON ((request.id = record.request)))
+            WHERE (record."metadataPrefix" = 'cmdi'::text)
+            GROUP BY request.endpoint_harvest) records ON ((endpoint_harvest.id = records.endpoint_harvest)))
+    ORDER BY harvest."when" DESC LIMIT 1;
+END;
+$$;
+
+ALTER FUNCTION public.insert_endpoint_info() OWNER TO oai;
+
+-- Function: insert latest harvest into harvest_info
+
+CREATE FUNCTION public.insert_harvest_info() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO table_harvest_info
+    SELECT lh.id,
+      count(endpoint_harvest.endpoint) AS endpoints,
+      COALESCE(sum(requests.count), (0)::numeric) AS requests,
+      COALESCE(sum(records.count), (0)::numeric) AS records,
+      lh."when",
+      lh.type
+    FROM (((( SELECT h.id,
+          h."when",
+          h.location,
+          h.type
+          FROM (public.harvest h
+              LEFT JOIN public.harvest n ON (((h.type = n.type) AND (h."when" < n."when"))))
+          WHERE (n."when" IS NULL)) lh
+    LEFT JOIN public.endpoint_harvest ON ((lh.id = endpoint_harvest.harvest)))
+    LEFT JOIN ( SELECT request.endpoint_harvest,
+            count(*) AS count
+          FROM public.request
+          GROUP BY request.endpoint_harvest) requests ON ((endpoint_harvest.id = requests.endpoint_harvest)))
+    LEFT JOIN ( SELECT request.endpoint_harvest,
+            count(*) AS count
+          FROM (public.request
+            JOIN public.record ON ((request.id = record.request)))
+          WHERE (record."metadataPrefix" = 'oai'::text)
+          GROUP BY request.endpoint_harvest) records ON ((endpoint_harvest.id = records.endpoint_harvest)))
+    GROUP BY lh.id, lh.type, lh."when"
+    ORDER BY lh."when" DESC LIMIT 1;
+END;
+$$;
+
+ALTER FUNCTION public.insert_harvest_info() OWNER TO oai;
+
