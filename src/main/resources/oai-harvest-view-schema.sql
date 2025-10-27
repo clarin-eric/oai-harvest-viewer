@@ -264,7 +264,7 @@ ALTER TABLE ONLY public.table_endpoint_info
 
 CREATE TABLE public.table_harvest_info (
     id bigint,
-    endpoint_id bigint,
+    harvest_id bigint,
     endpoints numeric,
     requests numeric,
     records numeric,
@@ -294,10 +294,10 @@ ALTER TABLE ONLY public.table_harvest_info
 
 -- - foreign key
 
-CREATE INDEX fki_table_harvest_info ON public.table_harvest_info USING btree (endpoint_id);
+CREATE INDEX fki_table_harvest_info ON public.table_harvest_info USING btree (harvest_id);
 
 ALTER TABLE ONLY public.table_harvest_info
-    ADD CONSTRAINT endpoint_table_harvest_info FOREIGN KEY (endpoint_id) REFERENCES public.endpoint(id) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT harvest_table_harvest_info FOREIGN KEY (harvest_id) REFERENCES public.harvest(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 		
 -- VIEW: endpoint_record
@@ -398,7 +398,8 @@ CREATE FUNCTION public.insert_endpoint_info(hid bigint) RETURNS void
     AS $$
 BEGIN
     INSERT INTO table_endpoint_info (endpoint_id, requests, records, "when", type, harvest, name_lower, name, location, url)
-    SELECT endpoint.id,
+    SELECT
+      endpoint.id,
       COALESCE(requests.count, (0)::bigint) AS requests,
       COALESCE(records.count, (0)::bigint) AS records,
       harvest."when",
@@ -408,20 +409,26 @@ BEGIN
       endpoint.name,
       endpoint_harvest.location,
       endpoint_harvest.url
-    FROM ((((public.endpoint
-      JOIN public.endpoint_harvest ON ((endpoint.id = endpoint_harvest.endpoint)))
-      JOIN public.harvest ON ((harvest.id = hid)))
-      LEFT JOIN ( SELECT request.endpoint_harvest,
-              count(*) AS count
-            FROM public.request
-            GROUP BY request.endpoint_harvest) requests ON ((endpoint_harvest.id = requests.endpoint_harvest)))
-      LEFT JOIN ( SELECT request.endpoint_harvest,
-              count(*) AS count
-            FROM (public.request
-              JOIN public.record ON ((request.id = record.request)))
-            WHERE (record."metadataPrefix" = 'cmdi'::text)
-            GROUP BY request.endpoint_harvest) records ON ((endpoint_harvest.id = records.endpoint_harvest)))
-    ORDER BY harvest."when" DESC LIMIT 1;
+    FROM endpoint_harvest
+    JOIN endpoint ON (endpoint.id = endpoint_harvest.endpoint)
+    JOIN harvest ON (harvest.id = endpoint_harvest.harvest)
+    LEFT JOIN ( -- get # requests
+      SELECT
+        request.endpoint_harvest,
+        count(*) AS count
+      FROM request
+      GROUP BY request.endpoint_harvest
+    ) requests ON (requests.endpoint_harvest = endpoint_harvest.id)
+    LEFT JOIN ( -- get # records
+      SELECT
+        request.endpoint_harvest,
+        count(*) AS count
+      FROM request
+      JOIN record ON (record.request = request.id)
+      WHERE (record."metadataPrefix" = 'cmdi'::text)
+      GROUP BY request.endpoint_harvest
+    ) records ON (records.endpoint_harvest = endpoint_harvest.id)
+    WHERE endpoint_harvest.harvest=hid;
 END;
 $$;
 
@@ -433,7 +440,7 @@ CREATE FUNCTION public.insert_harvest_info(hid bigint) RETURNS void
     LANGUAGE plpgsql
     AS $$
 BEGIN
-  INSERT INTO table_harvest_info (endpoint_id, endpoints, requests, records, "when", type)
+  INSERT INTO table_harvest_info (harvest_id, endpoints, requests, records, "when", type)
     SELECT lh.id,
       count(endpoint_harvest.endpoint) AS endpoints,
       COALESCE(sum(requests.count), (0)::numeric) AS requests,
