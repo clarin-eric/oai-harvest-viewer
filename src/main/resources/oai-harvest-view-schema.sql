@@ -205,7 +205,7 @@ ALTER TABLE ONLY public.record
 CREATE INDEX fki_record_request ON public.record USING btree (request);
 
 ALTER TABLE ONLY public.record
-    ADD CONSTRAINT record_request FOREIGN KEY (request) REFERENCES public.request(id);
+    ADD CONSTRAINT record_request FOREIGN KEY (request) REFERENCES public.request(id) ON DELETE CASCADE;
 
 -- - indices
 
@@ -393,7 +393,7 @@ ALTER FUNCTION public.check_harvests() OWNER TO oai;
 
 -- Function: insert latest harvest into table_endpoint_info
 
-CREATE FUNCTION public.insert_endpoint_info() RETURNS void
+CREATE FUNCTION public.insert_endpoint_info(hid bigint) RETURNS void
     LANGUAGE plpgsql
     AS $$
 BEGIN
@@ -410,7 +410,7 @@ BEGIN
       endpoint_harvest.url
     FROM ((((public.endpoint
       JOIN public.endpoint_harvest ON ((endpoint.id = endpoint_harvest.endpoint)))
-      JOIN public.harvest ON ((harvest.id = endpoint_harvest.harvest)))
+      JOIN public.harvest ON ((harvest.id = hid)))
       LEFT JOIN ( SELECT request.endpoint_harvest,
               count(*) AS count
             FROM public.request
@@ -425,11 +425,11 @@ BEGIN
 END;
 $$;
 
-ALTER FUNCTION public.insert_endpoint_info() OWNER TO oai;
+ALTER FUNCTION public.insert_endpoint_info(hid bigint) OWNER TO oai;
 
 -- Function: insert latest harvest into harvest_info
 
-CREATE FUNCTION public.insert_harvest_info() RETURNS void
+CREATE FUNCTION public.insert_harvest_info(hid bigint) RETURNS void
     LANGUAGE plpgsql
     AS $$
 BEGIN
@@ -447,7 +447,7 @@ BEGIN
           FROM (public.harvest h
               LEFT JOIN public.harvest n ON (((h.type = n.type) AND (h."when" < n."when"))))
           WHERE (n."when" IS NULL)) lh
-    LEFT JOIN public.endpoint_harvest ON ((lh.id = endpoint_harvest.harvest)))
+    LEFT JOIN public.endpoint_harvest ON ((lh.id = hid)))
     LEFT JOIN ( SELECT request.endpoint_harvest,
             count(*) AS count
           FROM public.request
@@ -463,5 +463,21 @@ BEGIN
 END;
 $$;
 
-ALTER FUNCTION public.insert_harvest_info() OWNER TO oai;
+ALTER FUNCTION public.insert_harvest_info(hid bigint) OWNER TO oai;
+
+-- FUNCTION: delete all the requests and records from previuous harvests
+
+CREATE FUNCTION public.delete_old_data(dtype text) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    DELETE FROM request where endpoint_harvest IN (
+      WITH last AS
+        ( SELECT id FROM harvest WHERE harvest.type=type ORDER BY harvest.when DESC LIMIT 1)
+        SELECT id FROM endpoint_harvest WHERE harvest NOT IN (select * from last)
+);
+END;
+$$;
+
+ALTER FUNCTION public.delete_old_data(dtype text) OWNER TO oai;
 
