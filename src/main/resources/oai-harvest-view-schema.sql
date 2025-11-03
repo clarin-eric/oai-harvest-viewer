@@ -220,13 +220,7 @@ CREATE TABLE public.table_endpoint_info (
     endpoint_id bigint,
     requests bigint,
     records bigint,
-    "when" timestamp with time zone,
-    type text,
-    harvest_id bigint,
-    name_lower text,
-    name text,
-    location text,
-    url text
+    harvest_id bigint
 );
 
 ALTER TABLE public.table_endpoint_info OWNER TO oai;
@@ -417,18 +411,12 @@ CREATE FUNCTION public.insert_endpoint_info(hid bigint) RETURNS void
     LANGUAGE plpgsql
     AS $$
 BEGIN
-    INSERT INTO table_endpoint_info (endpoint_id, requests, records, "when", type, harvest, name_lower, name, location, url)
+    INSERT INTO table_endpoint_info (endpoint_id, requests, records, harvest_id)
     SELECT
       endpoint.id,
       COALESCE(requests.count, (0)::bigint) AS requests,
       COALESCE(records.count, (0)::bigint) AS records,
-      harvest."when",
-      harvest.type,
-      harvest.id AS harvest,
-      LOWER(endpoint.name) AS name_lower,
-      endpoint.name,
-      endpoint_harvest.location,
-      endpoint_harvest.url
+      harvest.id AS harvest_id
     FROM endpoint_harvest
     JOIN endpoint ON (endpoint.id = endpoint_harvest.endpoint)
     JOIN harvest ON (harvest.id = endpoint_harvest.harvest)
