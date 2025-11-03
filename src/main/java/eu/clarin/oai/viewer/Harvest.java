@@ -75,9 +75,10 @@ public class Harvest {
         System.out.format("COMMIT;%n");
         // refresh materialized views
         System.out.format("SELECT insert_endpoint_info();%n");
-        System.out.format("SELECT insert_harvest_info();%n");
         System.out.format("SELECT delete_old_data(%s);%n",type);
         System.out.format("REFRESH MATERIALIZED VIEW public.mv_endpoint_record;%n");
+        System.out.format("REFRESH MATERIALIZED VIEW public.mv_endpoint_info;%n");
+        System.out.format("REFRESH MATERIALIZED VIEW public.mv_harvest_info;%n");
         // run some checks
         System.out.format("SELECT check_harvests();%n");
         return true;
