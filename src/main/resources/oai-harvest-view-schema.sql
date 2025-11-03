@@ -222,7 +222,7 @@ CREATE TABLE public.table_endpoint_info (
     records bigint,
     "when" timestamp with time zone,
     type text,
-    harvest bigint,
+    harvest_id bigint,
     name_lower text,
     name text,
     location text,
@@ -259,6 +259,26 @@ ALTER TABLE ONLY public.table_endpoint_info
 -- - index
 -- Do we need this?
 -- CREATE INDEX idx_endpoint_info_name_lower ON public.mv_endpoint_info USING gin (name_lower gin_trgm_ops);
+
+-- VIEW: mv_endpoint_info
+
+CREATE MATERIALIZED VIEW public.mv_endpoint_info AS
+    SELECT
+      table_endpoint_info.id,
+      requests,
+      records,
+      harvest_id,
+      harvest."when",
+      harvest.type,
+      LOWER(endpoint.name) AS name_lower,
+      endpoint.name,
+      endpoint_harvest.location,
+      endpoint_harvest.url
+    FROM table_endpoint_info
+    JOIN endpoint ON (endpoint.id = endpoint_id)
+    JOIN harvest ON (harvest.id = harvest_id)
+    JOIN endpoint_harvest ON (endpoint_harvest.harvest = harvest_id and endpoint_harvest.endpoint = endpoint.id)
+    ;
 
 -- Name: table_harvest_info
 
@@ -299,7 +319,7 @@ CREATE INDEX fki_table_harvest_info ON public.table_harvest_info USING btree (ha
 ALTER TABLE ONLY public.table_harvest_info
     ADD CONSTRAINT harvest_table_harvest_info FOREIGN KEY (harvest_id) REFERENCES public.harvest(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
-		
+
 -- VIEW: endpoint_record
 
 CREATE MATERIALIZED VIEW public.mv_endpoint_record AS
