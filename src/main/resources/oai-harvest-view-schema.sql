@@ -313,6 +313,21 @@ CREATE INDEX fki_table_harvest_info ON public.table_harvest_info USING btree (ha
 ALTER TABLE ONLY public.table_harvest_info
     ADD CONSTRAINT harvest_table_harvest_info FOREIGN KEY (harvest_id) REFERENCES public.harvest(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
+-- VIEW: mv_harvest_info
+
+CREATE MATERIALIZED VIEW public.mv_harvest_info AS
+    SELECT
+      harvest_id,
+      count(endpoint_harvest.endpoint) AS endpoints,
+      requests,
+      records,
+      harvest."when",
+      harvest.type
+    FROM table_endpoint_info
+--    JOIN endpoint ON (endpoint.id = endpoint_id)
+    JOIN harvest ON (harvest.id = harvest_id)
+    JOIN endpoint_harvest ON endpoint_harvest.harvest = harvest_id
+    GROUP BY harvest_id, requests, records, "when", type ;
 
 -- VIEW: endpoint_record
 
