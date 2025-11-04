@@ -318,17 +318,16 @@ ALTER TABLE ONLY public.table_harvest_info
 
 CREATE MATERIALIZED VIEW public.mv_harvest_info AS
     SELECT
-      harvest_id,
-      count(endpoint_harvest.endpoint) AS endpoints,
-      SUM(mv_endpoint_info.requests),
-      SUM(mv_endpoint_info.records),
+      table_endpoint_info.harvest_id,
+      count(mv_endpoint_info.endpoint_id) AS endpoints,
+      SUM(mv_endpoint_info.requests) as requests,
+      SUM(mv_endpoint_info.records) as rcords,
       harvest."when",
       harvest.type
     FROM table_endpoint_info
---    JOIN endpoint ON (endpoint.id = endpoint_id)
-    JOIN harvest ON (harvest.id = harvest_id)
-    JOIN mv_endpoint_info ON mv_endpoint_info.harvest_id = harvest_id
-    GROUP BY harvest_id, "when", type ;
+    JOIN harvest ON (harvest.id = table_endpoint_info.harvest_id)
+    JOIN mv_endpoint_info ON mv_endpoint_info.harvest_id = table_endpoint_info.harvest_id
+    GROUP BY table_endpoint_info.harvest_id, harvest."when", harvest.type ;
 
 -- VIEW: endpoint_record
 
