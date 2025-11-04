@@ -264,6 +264,7 @@ CREATE MATERIALIZED VIEW public.mv_endpoint_info AS
       harvest_id,
       harvest."when",
       harvest.type,
+      endpoint_id,
       LOWER(endpoint.name) AS name_lower,
       endpoint.name,
       endpoint_harvest.location,
@@ -319,15 +320,15 @@ CREATE MATERIALIZED VIEW public.mv_harvest_info AS
     SELECT
       harvest_id,
       count(endpoint_harvest.endpoint) AS endpoints,
-      requests,
-      records,
+      SUM(mv_endpoint_info.requests),
+      SUM(mv_endpoint_info.records),
       harvest."when",
       harvest.type
     FROM table_endpoint_info
 --    JOIN endpoint ON (endpoint.id = endpoint_id)
     JOIN harvest ON (harvest.id = harvest_id)
-    JOIN endpoint_harvest ON endpoint_harvest.harvest = harvest_id
-    GROUP BY harvest_id, requests, records, "when", type ;
+    JOIN mv_endpoint_info ON mv_endpoint_info.harvest_id = harvest_id
+    GROUP BY harvest_id, "when", type ;
 
 -- VIEW: endpoint_record
 
