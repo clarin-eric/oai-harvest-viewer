@@ -19,6 +19,18 @@ services:
     environment:
       API_URL: http://localhost:3000/
 
+  web:
+    image: nginx
+    volumes:
+      - ./html:/usr/share/nginx/html
+    ports:
+      - "80:80"
+    expose:
+      - "80"
+    networks:
+      - oai_viewer
+    
+
 networks:
   oai_viewer:
     external: false
