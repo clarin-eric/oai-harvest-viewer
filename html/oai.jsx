@@ -18,11 +18,11 @@ var Harvests = React.createClass({
   loadHarvests: function() {
     $(".harvests .highlight").removeClass("highlight");
     $.ajax({
-      url: base + "/harvest_info?" + $.param({api_key:key, order:'type ASC'}),
+      url: base + "mv_harvest_info",
       dataType: 'json',
-      cache: false,
-      success: function(data) {
-        this.setState({data: data.resource});
+      cache: true,
+      success: function(d) {
+        this.setState({data: d});
       }.bind(this),
       error: function(xhr, status, err) {
         console.log(this.url, status, err.toString());
@@ -38,7 +38,7 @@ var Harvests = React.createClass({
   render: function() {
     var harvests = this.state.data.map(function(harvest) {
       return (
-        <Harvest key={"h"+harvest.id} id={harvest.id} type={harvest.type} when={harvest.when} endpoints={harvest.endpoints} requests={harvest.requests} records={harvest.records}/>
+        <Harvest key={"h"+harvest.harvest_id} id={harvest.harvest_id} type={harvest.type} when={harvest.when} endpoints={harvest.endpoints} requests={harvest.requests} records={harvest.records}/>
       );
     });
     return <div>
