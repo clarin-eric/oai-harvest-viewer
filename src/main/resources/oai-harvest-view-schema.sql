@@ -387,7 +387,7 @@ BEGIN
     SET identifier = rr.identifier, request = rr.request
     FROM (
       SELECT r.id, oai.identifier, oai.request
-      FROM api.record AS r, record AS oai, request, endpoint_harvest, endpoint
+      FROM api.record AS r, api.record AS oai, api.request, api.endpoint_harvest, api.endpoint
       WHERE r.request ISNULL
         AND oai.alfanum = r.alfanum
         AND oai."metadataPrefix" = 'oai'
