@@ -323,7 +323,7 @@ CREATE MATERIALIZED VIEW api.mv_harvest_info AS
       table_endpoint_info.harvest_id,
       count(mv_endpoint_info.endpoint_id) AS endpoints,
       SUM(mv_endpoint_info.requests) as requests,
-      SUM(mv_endpoint_info.records) as rcords,
+      SUM(mv_endpoint_info.records) as records,
       harvest."when",
       harvest.type
     FROM api.table_endpoint_info
