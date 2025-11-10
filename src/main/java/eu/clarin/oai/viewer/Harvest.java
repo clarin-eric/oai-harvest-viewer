@@ -51,7 +51,7 @@ public class Harvest {
         // begin transaction
         System.out.format("BEGIN;%n");
         System.err.format("-- OAI Harvest: %s%n", dir);
-        System.out.format("INSERT INTO harvest(location,type) VALUES ('%s', '%s');%n", dir, type);
+        System.out.format("INSERT INTO api.harvest(location,type) VALUES ('%s', '%s');%n", dir, type);
         try {
             // first crawl the OAI-PMH responses
             OAIVisitor visitor = new OAIVisitor(this);
@@ -70,17 +70,17 @@ public class Harvest {
             return false;
         }
         // link en mass converted records to the OAI request
-        System.out.format("SELECT link_harvest_records(currval('harvest_id_seq'::regclass));%n");
+        System.out.format("SELECT api.link_harvest_records(currval('api.harvest_id_seq'::regclass));%n");
         // end transaction
         System.out.format("COMMIT;%n");
         // refresh materialized views
-        System.out.format("SELECT insert_endpoint_info();%n");
-        System.out.format("SELECT delete_old_data(%s);%n",type);
-        System.out.format("REFRESH MATERIALIZED VIEW public.mv_endpoint_record;%n");
-        System.out.format("REFRESH MATERIALIZED VIEW public.mv_endpoint_info;%n");
-        System.out.format("REFRESH MATERIALIZED VIEW public.mv_harvest_info;%n");
+        System.out.format("SELECT api.insert_endpoint_info(currval('api.harvest_id_seq'::regclass));%n");
+        System.out.format("SELECT api.delete_old_data('%s');%n",type);
+        System.out.format("REFRESH MATERIALIZED VIEW api.mv_endpoint_record;%n");
+        System.out.format("REFRESH MATERIALIZED VIEW api.mv_endpoint_info;%n");
+        System.out.format("REFRESH MATERIALIZED VIEW api.mv_harvest_info;%n");
         // run some checks
-        System.out.format("SELECT check_harvests();%n");
+        System.out.format("SELECT api.check_harvests();%n");
         return true;
     }
     

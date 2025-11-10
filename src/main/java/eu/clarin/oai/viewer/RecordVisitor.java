@@ -39,7 +39,7 @@ public class RecordVisitor extends SimpleFileVisitor<Path> {
             return CONTINUE;
         }
         if (records == 0)
-            System.out.format("INSERT INTO \"record\"(\"metadataPrefix\",location,endpoint_name,alfanum) VALUES %n");
+            System.out.format("INSERT INTO api.\"record\"(\"metadataPrefix\",location,endpoint_name,alfanum) VALUES %n");
         else
             System.out.format(",%n");
 
