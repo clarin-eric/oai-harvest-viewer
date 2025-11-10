@@ -524,5 +524,6 @@ grant select on api.endpoint_harvest to view_api;
 grant select on api.harvest to view_api;
 grant select on api.mv_endpoint_record  to view_api;
 grant select on api.mv_harvest_info to view_api;
+grant select on api.mv_endpoint_info to view_api;
 
 grant view_api to oai;
