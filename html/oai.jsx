@@ -116,14 +116,16 @@ var Endpoints = React.createClass({
       url: base + "mv_endpoint_info?" + $.param(params),
       headers: {
         "Range-Unit": "items",
-        "Range": ""+offset+"-"+offset+endPagesize, 
+        "Range": ""+offset+"-"+offset+endPagesize,
         "Prefer": "count=exact"
       },
       dataType: 'json',
       cache: true,
       success: function(d,status,xhr) {
         console.log(xhr.getResponseHeader('content-range'));
-        this.setState({data: d, meta:{count:0}, page:page, filter:filter});
+        var cr = xhr.getResponseHeader('content-range');
+        var cnt = cr.split("/")[1];
+        this.setState({data: d, meta:{count:cnt}, page:page, filter:filter});
       }.bind(this),
       error: function(xhr, status, err) {
         console.log(this.url, status, err.toString());
@@ -240,11 +242,11 @@ var EndpointInfo = React.createClass({
   },
   loadInfo: function(endpoint) {
     $.ajax({
-      url: base + "/endpoint_info?" + $.param({api_key:key, filter:"id="+endpoint}),
+      url: base + "mv_endpoint_info?" + $.param({"harvest_id":"eq."+endpoint}),
       dataType: 'json',
-      cache: false,
+      cache: true,
       success: function(data) {
-        this.setState({data: data.resource[0]});
+        this.setState({data: data[0]});
       }.bind(this),
       error: function(xhr, status, err) {
         console.log(this.url, status, err.toString());
