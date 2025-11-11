@@ -346,7 +346,7 @@ CREATE MATERIALIZED VIEW api.mv_endpoint_record AS
         JOIN api.request ON ((record.request = request.id))) 
         JOIN api.endpoint_harvest ON ((request.endpoint_harvest = endpoint_harvest.id))
         JOIN api.harvest ON ((endpoint_harvest.harvest = harvest.id))
-        JOIN api.table_harvest_info ON ((harvest.id = table_harvest_info.id)));
+        JOIN api.table_harvest_info ON ((harvest.id = table_harvest_info.harvest_id)));
 		
 ALTER TABLE api.mv_endpoint_record OWNER TO oai;
 
