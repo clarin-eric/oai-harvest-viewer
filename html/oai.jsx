@@ -100,25 +100,30 @@ var Endpoints = React.createClass({
     $(".endpoints .highlight").removeClass("highlight");
     if (page == null)
       page = 1;
-    if (filter == null)
-      filter = this.state.filter;
     var offset = (page - 1) * endPagesize;
-    var f = "";
+    var h = "";
     if (harvest)
-        f = "(harvest="+harvest+")";
+        h = harvest;
     else if (this.props.harvest)
-        f = "(harvest="+this.props.harvest+")";
-    if (filter != "") {
-      if (f != "")
-        f += " AND ";
-      f += "(name_lower LIKE '%"+filter.replace(/'/g,"''").toLowerCase()+"%')";
+        h = this.props.harvest;
+    var params = {
+      harvest_id: 'eq.'+h, 
+      order:'name.asc'
     }
+    if (filter != "")
+      params["name_lower"]="like."+"'*"+filter.replace(/'/g,"''").toLowerCase()+"*'";
     $.ajax({
-      url: base + "/endpoint_info?" + $.param({offset:offset, limit:endPagesize, include_count:true, filter:f, api_key:key, order:'name ASC'}),
+      url: base + "mv_endpoint_info?" + $.param(params),
+      headers: {
+        "Range-Unit": "items",
+        "Range": ""+offset+"-"+offset+endPagesize, 
+        "Prefer": "count=exact"
+      },
       dataType: 'json',
-      cache: false,
-      success: function(data) {
-        this.setState({data: data.resource, meta:data.meta, page:page, filter:filter});
+      cache: true,
+      success: function(d,status,xhr) {
+        console.log(xhr.getResponseHeader('content-range'));
+        this.setState({data: d, meta:{count:0}, page:page, filter:filter});
       }.bind(this),
       error: function(xhr, status, err) {
         console.log(this.url, status, err.toString());
