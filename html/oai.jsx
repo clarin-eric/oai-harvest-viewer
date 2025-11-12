@@ -449,13 +449,13 @@ var RecordInfo = React.createClass({
   },
   loadInfo: function(harvest,endpoint,identifier) {
       var url = base + "mv_endpoint_record?harvest=eq." + harvest + "&endpoint=eq." + endpoint + "&identifier=eq." + identifier;
-        // + $.param({api_key:key, filter:"(harvest="+harvest+") AND (endpoint="+endpoint+") AND (identifier='"+identifier+"')"}),
+      // + $.param({api_key:key, filter:"(harvest="+harvest+") AND (endpoint="+endpoint+") AND (identifier='"+identifier+"')"}),
     $.ajax({
       url: url,
       dataType: 'json',
       cache: true,
-      success: function(data) {
-        this.setState({data: data});
+      success: function(d) {
+        this.setState({data: {resource: d}});
       }.bind(this),
       error: function(xhr, status, err) {
         console.log(this.url, status, err.toString());
@@ -477,6 +477,7 @@ var RecordInfo = React.createClass({
       this.loadInfo(harvest,endpoint,identifier);
   },
   render: function() {
+    console.log("data["+this.state.data+"]");
     var reps = this.state.data.resource.map(function(type,resource) {
       return (
         <tr key={resource.metadataPrefix}>
