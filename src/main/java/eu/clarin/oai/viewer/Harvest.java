@@ -75,6 +75,7 @@ public class Harvest {
         System.out.format("COMMIT;%n");
         // refresh materialized views
         System.out.format("SELECT api.insert_endpoint_info(currval('api.harvest_id_seq'::regclass));%n");
+        System.out.format("SELECT api.insert_harvest_info(currval('api.harvest_id_seq'::regclass));%n");
         System.out.format("SELECT api.delete_old_data('%s');%n",type);
         System.out.format("REFRESH MATERIALIZED VIEW api.mv_endpoint_record;%n");
         System.out.format("REFRESH MATERIALIZED VIEW api.mv_endpoint_info;%n");
