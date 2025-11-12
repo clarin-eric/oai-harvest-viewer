@@ -122,7 +122,6 @@ var Endpoints = React.createClass({
       dataType: 'json',
       cache: true,
       success: function(d,status,xhr) {
-        console.log(xhr.getResponseHeader('content-range'));
         var cr = xhr.getResponseHeader('content-range');
         var cnt = cr.split("/")[1];
         this.setState({data: d, meta:{count:cnt}, page:page, filter:filter});
@@ -160,7 +159,7 @@ var Endpoints = React.createClass({
     var pages = Math.ceil(this.state.meta.count / endPagesize);
     var endpoints = this.state.data.map(function(endpoint) {
       return (
-        <Endpoint key={"e"+endpoint.id} id={endpoint.id} harvest={endpoint.harvest} name={endpoint.name} location={endpoint.location} type={endpoint.type} url={endpoint.url}/>
+        <Endpoint key={"e"+endpoint.id} id={endpoint.id} harvest={endpoint.harvest_id} name={endpoint.name} location={endpoint.location} type={endpoint.type} url={endpoint.url}/>
       );
     });
     var glyph = <Button onClick={this.handleFilter}>
@@ -326,12 +325,17 @@ var Records = React.createClass({
     var f = "";
     if (filter != "")
       f = " AND (identifier_lower LIKE '%"+filter.replace(/'/g,"''").toLowerCase()+"%')";
+      var url = base + "mv_endpoint_record?" +"endpoint=eq."+endpoint+"&harvest=eq."+harvest;
+//    var url =  base + "/mv_endpoint_record?" + $.param({offset:offset, limit:recPagesize, include_count:true, filter:"(metadataPrefix='cmdi') AND (endpoint="+endpoint+") AND (harvest=.eq("+harvest+"))"+f , api_key:key};
+//    console.log(url);
     $.ajax({
-    url: base + "/endpoint_record?" + $.param({offset:offset, limit:recPagesize, include_count:true, filter:"(metadataPrefix='cmdi') AND (endpoint="+endpoint+") AND (harvest="+harvest+")"+f , api_key:key}),
+      url: url,
       dataType: 'json',
-      cache: false,
-      success: function(data) {
-        this.setState({data:data.resource, meta:data.meta, page:page, endpoint:endpoint, harvest:harvest, filter:filter});
+      cache: true,
+      success: function(d,status,xhr) {
+        var cr = xhr.getResponseHeader('content-range');
+        var cnt = cr.split("/")[1];
+        this.setState({data:d, meta:{count:cnt}, page:page, endpoint:endpoint, harvest:harvest, filter:filter});
       }.bind(this),
       error: function(xhr, status, err) {
         console.log(this.url, status, err.toString());
@@ -341,12 +345,14 @@ var Records = React.createClass({
   componentDidMount: function() {
     var endpoint = this.props.endpoint;
     var harvest = this.props.harvest;
+      console.log('componentDidMount: ' + endpoint +' - '+ harvest);
     if (endpoint && harvest)
       this.loadRecords(endpoint,harvest);
   },
   componentWillReceiveProps: function (nextProps) {
     var endpoint = nextProps.endpoint;
     var harvest = nextProps.harvest;
+      console.log('componentWillReceiveProps: ' + endpoint +' - '+ harvest);
     if (endpoint && harvest) {
       this.loadRecords(endpoint,harvest,1,'');
     }
