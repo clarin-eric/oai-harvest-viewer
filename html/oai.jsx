@@ -352,7 +352,6 @@ var Records = React.createClass({
   componentWillReceiveProps: function (nextProps) {
     var endpoint = nextProps.endpoint;
     var harvest = nextProps.harvest;
-      console.log('componentWillReceiveProps: ' + endpoint +' - '+ harvest);
     if (endpoint && harvest) {
       this.loadRecords(endpoint,harvest,1,'');
     }
@@ -429,6 +428,7 @@ var Records = React.createClass({
 // A single Record
 var Record = React.createClass({
   handleClick: function(me) {
+    console.log('A single Record');
     $(ReactDOM.findDOMNode(this)).addClass('highlight').siblings().removeClass('highlight');
     ReactDOM.render(
       <RecordInfo endpoint={this.props.endpoint} identifier={this.props.identifier} harvest={this.props.harvest} type={this.props.type} location={this.props.location}/>,
@@ -448,10 +448,12 @@ var RecordInfo = React.createClass({
     return {data: { resource: [ { metadataPrefix: "none"}] } };
   },
   loadInfo: function(harvest,endpoint,identifier) {
+      var url = base + "mv_endpoint_record?harvest=eq." + harvest + "&endpoint=eq." + endpoint + "&identifier=eq." + identifier;
+        // + $.param({api_key:key, filter:"(harvest="+harvest+") AND (endpoint="+endpoint+") AND (identifier='"+identifier+"')"}),
     $.ajax({
-      url: base + "/endpoint_record?" + $.param({api_key:key, filter:"(harvest="+harvest+") AND (endpoint="+endpoint+") AND (identifier='"+identifier+"')"}),
+      url: url,
       dataType: 'json',
-      cache: false,
+      cache: true,
       success: function(data) {
         this.setState({data: data});
       }.bind(this),
