@@ -329,7 +329,8 @@ CREATE MATERIALIZED VIEW api.mv_harvest_info AS
     FROM api.table_endpoint_info
     JOIN api.harvest ON (harvest.id = table_endpoint_info.harvest_id)
     JOIN api.mv_endpoint_info ON mv_endpoint_info.harvest_id = table_endpoint_info.harvest_id
-    GROUP BY api.table_endpoint_info.harvest_id, harvest."when", harvest.type ;
+    GROUP BY api.table_endpoint_info.harvest_id, harvest."when", harvest.type
+    ORDER BY harvest."when" DESC ;
 
 -- VIEW: endpoint_record
 
