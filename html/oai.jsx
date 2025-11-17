@@ -28,10 +28,13 @@ var Harvests = React.createClass({
       cache: true,
       headers: {
         "Range-Unit": "items",
-        "Range": ""+offset+"-"+offset+harvPagesize,
+        "Range": ""+offset+"-"+(offset+harvPagesize-1),
         "Prefer": "count=exact"
       },
       success: function(d) {
+//        var cr = xhr.getResponseHeader('content-range');
+  //      var cnt = cr.split("/")[1];
+    //    this.setState({data: d, meta:{count:cnt}, page:page, filter:filter});
         this.setState({data: d});
       }.bind(this),
       error: function(xhr, status, err) {
@@ -162,7 +165,7 @@ var Endpoints = React.createClass({
       url: base + "mv_endpoint_info?" + $.param(params),
       headers: {
         "Range-Unit": "items",
-        "Range": ""+offset+"-"+offset+endPagesize,
+        "Range": ""+offset+"-"+(offset+endPagesize-1),
         "Prefer": "count=exact"
       },
       dataType: 'json',
@@ -191,6 +194,7 @@ var Endpoints = React.createClass({
   },
   handleSelect: function (event, selectedEvent) {
     var page = selectedEvent.eventKey;
+      console.log('clicked on paging button');
     this.loadEndpoints(page);
   },
   handleFilter: function () {
@@ -285,12 +289,13 @@ var EndpointInfo = React.createClass({
   getInitialState: function() {
     return {data: []};
   },
-  loadInfo: function(endpoint) {
+  loadInfo: function(id) {
     $.ajax({
-      url: base + "mv_endpoint_info?" + $.param({"harvest_id":"eq."+endpoint}),
+      url: base + "mv_endpoint_info?" + $.param({"id":"eq."+id}),
       dataType: 'json',
       cache: true,
       success: function(data) {
+        console.log('data: ' + data[0])
         this.setState({data: data[0]});
       }.bind(this),
       error: function(xhr, status, err) {
