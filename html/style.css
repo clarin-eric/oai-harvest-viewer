@@ -17,3 +17,7 @@
 }
 
 .table-striped tbody tr.highlight td { background-color: #337AB7; color: #fff; }
+
+tr.latest td {
+    font-weight: bold;
+}

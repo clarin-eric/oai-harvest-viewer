@@ -17,13 +17,16 @@ var Harvests = React.createClass({
   },
   loadHarvests: function(page,filter) {
     $(".harvests .highlight").removeClass("highlight");
+    var params = {};
     if (page == null)
       page = 1;
     var offset = (page - 1) * harvPagesize;
-    //if (filter != "")
-    //  params["name_lower"]="like."+"'*"+filter.replace(/'/g,"''").toLowerCase()+"*'";
+    if (filter == null)
+      filter = '';
+    if (filter != "")
+      params["type"]="like."+"*"+filter.replace(/'/g,"''").toLowerCase()+"*";
     $.ajax({
-      url: base + "mv_harvest_info",
+      url: base + "mv_harvest_info?" + $.param(params),
       dataType: 'json',
       cache: true,
       headers: {
@@ -159,6 +162,8 @@ var Endpoints = React.createClass({
       harvest_id: 'eq.'+h, 
       order:'name.asc'
     }
+    if (filter == null)
+      filter = '';
     if (filter != "")
       params["name_lower"]="like."+"'*"+filter.replace(/'/g,"''").toLowerCase()+"*'";
     $.ajax({
@@ -195,7 +200,7 @@ var Endpoints = React.createClass({
   handleSelect: function (event, selectedEvent) {
     var page = selectedEvent.eventKey;
       console.log('clicked on paging button (Endpoint)');
-    this.loadEndpoints(page);
+    this.loadEndpoints(page,this.state.filter,this.props.harvest);
   },
   handleFilter: function () {
     this.loadEndpoints(1,this.refs.filterEndpoints.getValue());
