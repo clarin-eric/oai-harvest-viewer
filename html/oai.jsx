@@ -17,7 +17,9 @@ var Harvests = React.createClass({
   },
   loadHarvests: function(page,filter) {
     $(".harvests .highlight").removeClass("highlight");
-    var params = {};
+    var params = {
+      order:'"when".desc'
+    }
     if (page == null)
       page = 1;
     var offset = (page - 1) * harvPagesize;
@@ -372,17 +374,20 @@ var Records = React.createClass({
     $(".records .highlight").removeClass("highlight");
     if (page == null)
       page = 1;
+    var params = { }
     if (filter == null)
       filter = this.state.filter;
     var offset = (page - 1) * recPagesize;
     this.state.endpoint = endpoint;
     this.state.harvest = harvest;
     var f = "";
+    if (filter == null)
+      filter = '';
     if (filter != "")
-      f = " AND (identifier_lower LIKE '%"+filter.replace(/'/g,"''").toLowerCase()+"%')";
-      var url = base + "mv_endpoint_record?" +"endpoint=eq."+endpoint+"&harvest=eq."+harvest;
+      params["identifier"]="like."+"*"+filter.replace(/'/g,"''").toLowerCase()+"*";
+      var url = base + "mv_endpoint_record?" +"endpoint=eq."+endpoint+"&harvest=eq."+harvest + "&" + $.param(params);
 //    var url =  base + "/mv_endpoint_record?" + $.param({offset:offset, limit:recPagesize, include_count:true, filter:"(metadataPrefix='cmdi') AND (endpoint="+endpoint+") AND (harvest=.eq("+harvest+"))"+f , api_key:key};
-//    console.log(url);
+          //
     $.ajax({
       url: url,
       headers: {
