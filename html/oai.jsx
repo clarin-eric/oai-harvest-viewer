@@ -13,14 +13,24 @@ var Col = ReactBootstrap.Col;
 // A list of Harvests
 var Harvests = React.createClass({
   getInitialState: function() {
-    return {data: []};
+    return {data: [], meta: {count:0}, page:1, filter:""};
   },
-  loadHarvests: function() {
+  loadHarvests: function(page,filter) {
     $(".harvests .highlight").removeClass("highlight");
+    if (page == null)
+      page = 1;
+    var offset = (page - 1) * harvPagesize;
+    //if (filter != "")
+    //  params["name_lower"]="like."+"'*"+filter.replace(/'/g,"''").toLowerCase()+"*'";
     $.ajax({
       url: base + "mv_harvest_info",
       dataType: 'json',
       cache: true,
+      headers: {
+        "Range-Unit": "items",
+        "Range": ""+offset+"-"+offset+harvPagesize,
+        "Prefer": "count=exact"
+      },
       success: function(d) {
         this.setState({data: d});
       }.bind(this),
@@ -30,18 +40,54 @@ var Harvests = React.createClass({
     });
   },
   componentDidMount: function() {
-    this.loadHarvests();
+    this.loadHarvests(1,'');
+  },
+  handleFilter: function () {
+    this.loadHarvests(1,this.refs.filterHarvests.getValue());
+  },
+  handleChange: function() {
+    this.setState({filter:this.refs.filterHarvests.getValue()});
   },
   handleSelect: function (event, selectedEvent) {
-    this.loadHarvests();
+    var page = selectedEvent.eventKey;
+    this.loadHarvests(page);
   },
   render: function() {
+    var filter = this.state.filter;
+    var page = this.state.page;
+    var pages = Math.ceil(this.state.meta.count / harvPagesize);
     var harvests = this.state.data.map(function(harvest) {
       return (
         <Harvest key={"h"+harvest.harvest_id} id={harvest.harvest_id} type={harvest.type} when={harvest.when} endpoints={harvest.endpoints} requests={harvest.requests} records={harvest.records}/>
       );
     });
+    var glyph = <Button onClick={this.handleFilter}>
+      <Glyphicon glyph="filter" />
+    </Button>;
     return <div>
+      <Row>
+        <Col xs={12} md={12} className="harvestsHeader" fill>
+          <Panel fill>
+            <span className="section col-xs-4">Harvests</span>
+            <span className="col-xs-4">
+              <Input ref="filterHarvests" className="filter" type="text" hasFeedback placeholder="Enter harvest filter" value={this.state.filter} buttonAfter={glyph} onChange={this.handleChange}/>
+            </span>
+            <span className="col-xs-4">
+              <Pagination className="pagination" 
+                prev
+                next
+                first
+                last
+                ellipsis
+                items={pages}
+                maxButtons={5}
+                activePage={page}
+                onSelect={this.handleSelect}
+              />
+            </span>
+          </Panel>
+        </Col>
+      </Row>
       <Row>      
         <Col xs={12} md={12} className="harvests" fill>
           <Table striped bordered condensed hover fill>
