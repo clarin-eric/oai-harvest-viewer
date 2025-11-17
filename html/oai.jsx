@@ -31,11 +31,10 @@ var Harvests = React.createClass({
         "Range": ""+offset+"-"+(offset+harvPagesize-1),
         "Prefer": "count=exact"
       },
-      success: function(d) {
-//        var cr = xhr.getResponseHeader('content-range');
-  //      var cnt = cr.split("/")[1];
-    //    this.setState({data: d, meta:{count:cnt}, page:page, filter:filter});
-        this.setState({data: d});
+      success: function(d,status,xhr) {
+        var cr = xhr.getResponseHeader('content-range');
+        var cnt = cr.split("/")[1];
+        this.setState({data: d, meta:{count:cnt}, page:page, filter:filter});
       }.bind(this),
       error: function(xhr, status, err) {
         console.log(this.url, status, err.toString());
@@ -53,6 +52,7 @@ var Harvests = React.createClass({
   },
   handleSelect: function (event, selectedEvent) {
     var page = selectedEvent.eventKey;
+    console.log('clicked on paging button (Harvests)');
     this.loadHarvests(page);
   },
   render: function() {
@@ -194,7 +194,7 @@ var Endpoints = React.createClass({
   },
   handleSelect: function (event, selectedEvent) {
     var page = selectedEvent.eventKey;
-      console.log('clicked on paging button');
+      console.log('clicked on paging button (Endpoint)');
     this.loadEndpoints(page);
   },
   handleFilter: function () {
@@ -295,7 +295,6 @@ var EndpointInfo = React.createClass({
       dataType: 'json',
       cache: true,
       success: function(data) {
-        console.log('data: ' + data[0])
         this.setState({data: data[0]});
       }.bind(this),
       error: function(xhr, status, err) {
@@ -381,6 +380,11 @@ var Records = React.createClass({
 //    console.log(url);
     $.ajax({
       url: url,
+      headers: {
+        "Range-Unit": "items",
+        "Range": ""+offset+"-"+(offset+endPagesize-1),
+        "Prefer": "count=exact"
+      },
       dataType: 'json',
       cache: true,
       success: function(d,status,xhr) {
@@ -396,7 +400,6 @@ var Records = React.createClass({
   componentDidMount: function() {
     var endpoint = this.props.endpoint;
     var harvest = this.props.harvest;
-      console.log('componentDidMount: ' + endpoint +' - '+ harvest);
     if (endpoint && harvest)
       this.loadRecords(endpoint,harvest);
   },
@@ -479,7 +482,6 @@ var Records = React.createClass({
 // A single Record
 var Record = React.createClass({
   handleClick: function(me) {
-    console.log('A single Record');
     $(ReactDOM.findDOMNode(this)).addClass('highlight').siblings().removeClass('highlight');
     ReactDOM.render(
       <RecordInfo endpoint={this.props.endpoint} identifier={this.props.identifier} harvest={this.props.harvest} type={this.props.type} location={this.props.location}/>,
@@ -528,7 +530,6 @@ var RecordInfo = React.createClass({
       this.loadInfo(harvest,endpoint,identifier);
   },
   render: function() {
-    console.log("data["+this.state.data+"]");
     var reps = this.state.data.resource.map(function(type,resource) {
       return (
         <tr key={resource.metadataPrefix}>
