@@ -263,7 +263,7 @@ var Endpoints = React.createClass({
         <Col xs={4} md={4} className="endpointInfo" fill>
           <Panel header="Endpoint Info">
             <div id="_endpointInfo">Select an Endpoint</div>
-            <div id="_endpointHisto">Histogram</div>
+            <div className="inlinebar" id="_endpointHisto">0,1,2,3,4</div>
           </Panel>
         </Col>
       </Row>
@@ -389,8 +389,8 @@ var EndpointHisto = React.createClass({
           result_req.push(row.requests);
         });
         var d = {
-            requests: result_req.join(),
-            records: result_rec.join()
+            requests: result_req,
+            records: result_rec
         }
         this.setState({data: d});
         console.log('data: ' + JSON.stringify(this.state.data));
@@ -404,6 +404,7 @@ var EndpointHisto = React.createClass({
     var endpoint = this.props.endpoint;
     if (endpoint)
       this.loadInfo(endpoint);
+      $.sparkline_display_visible();
   },
   componentWillReceiveProps: function (nextProps) {
     var endpoint = nextProps.endpoint;
@@ -413,7 +414,13 @@ var EndpointHisto = React.createClass({
   },
   render: function() {
     return <div>
-      <span className="inlinebar">{this.state.data.records}</span>
+      <span  className="inlinebar" id="histogram">Histogram ...</span>
+      <script type="text/javascript">
+        var barchart = $('<span>&nbsp;</span>');
+        barchart.sparkline(this.state.data.records);
+        $('#histogram').append(barchart);
+        $.sparkline_display_visible();
+      </script>
     </div>;
   }
 });
