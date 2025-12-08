@@ -389,8 +389,8 @@ var EndpointHisto = React.createClass({
           result_req.push(row.requests);
         });
         var d = {
-            requests: result_req,
-            records: result_rec
+            requests: result_req.join(),
+            records: result_rec.join()
         }
         this.setState({data: d});
         console.log('data: ' + JSON.stringify(this.state.data));
@@ -404,23 +404,22 @@ var EndpointHisto = React.createClass({
     var endpoint = this.props.endpoint;
     if (endpoint)
       this.loadInfo(endpoint);
-      $.sparkline_display_visible();
+//    console.log("componentDidMount: before spark");
+ //   spark();
+ //   console.log("after spark");
   },
   componentWillReceiveProps: function (nextProps) {
     var endpoint = nextProps.endpoint;
     if (endpoint) {
       this.loadInfo(endpoint);
     }
+    console.log("componentWillRecieveProps: before spark");
+    spark();
+    console.log("after spark");
   },
   render: function() {
     return <div>
-      <span  className="inlinebar" id="histogram">Histogram ...</span>
-      <script type="text/javascript">
-        var barchart = $('<span>&nbsp;</span>');
-        barchart.sparkline(this.state.data.records);
-        $('#histogram').append(barchart);
-        $.sparkline_display_visible();
-      </script>
+      <span className="inlinebar" id="histogram">{this.state.data.records}</span>
     </div>;
   }
 });
