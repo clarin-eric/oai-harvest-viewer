@@ -4,7 +4,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      PGRST_DB_URI: postgres://oai:oai@host.docker.internal:5432/oai
+      PGRST_DB_URI: postgres://oai:5678@host.docker.internal:5432/oai_5
       PGRST_DB_SCHEMAS: "api"
       PGRST_DB_ANON_ROLE: "view_api"
       PGRST_OPENAPI_SERVER_PROXY_URI: http://localhost:3000
@@ -22,7 +22,7 @@ services:
   web:
     image: nginx
     volumes:
-      - ./html:/usr/share/nginx/html
+      - ./react/dist:/usr/share/nginx/html
     ports:
       - "80:80"
     expose:
