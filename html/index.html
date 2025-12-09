@@ -10,23 +10,19 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-bootstrap/0.28.2/react-bootstrap.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script type="text/javascript" src="jquery.sparkline.js"></script>
-    <script type="text/javascript">
-    $(function(myValues) {
-        /* Use 'html' instead of an array of values to pass options 
-        to a sparkline with data in the tag */
-        $('.inlinebar').sparkline('html', {type: 'bar', barColor: 'red'} );
-        $('.dynamicsparkline').sparkline(myValues);
-    });
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.js"></script>
   </head>
   <body>
     <div id="_content"></div>
     <script src="config.js"></script>
     <script src="oai.jsx" type="text/babel"></script>
-    <p>
-Bar chart with inline data: <span class="inlinebar">1,3,4,5,3,5</span>
-</p>
-
+    <svg> 
+  <circle class="target" style="fill: #69b3a2" stroke="black" cx=50 cy=50 r=40></circle>
+</svg>
+<script>
+d3
+  .select(".target")  // select the elements that have the class 'target'
+  .style("stroke-width", 8) // change their style: stroke width is not equal to 8 pixels
+</script>
   </body>
 </html>

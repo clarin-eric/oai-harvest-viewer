@@ -263,7 +263,6 @@ var Endpoints = React.createClass({
         <Col xs={4} md={4} className="endpointInfo" fill>
           <Panel header="Endpoint Info">
             <div id="_endpointInfo">Select an Endpoint</div>
-            <div className="inlinebar" id="_endpointHisto">0,1,2,3,4</div>
           </Panel>
         </Col>
       </Row>
@@ -282,10 +281,6 @@ var Endpoint = React.createClass({
     ReactDOM.render(
       <EndpointInfo endpoint={this.props.id} type={this.props.type} name={this.props.name} url={this.props.url}/>,
       document.getElementById('_endpointInfo')
-    );
-    ReactDOM.render(
-      <EndpointHisto endpoint={this.props.id} type={this.props.type} name={this.props.name} url={this.props.url}/>,
-      document.getElementById('_endpointHisto')
     );
   },
   render: function() {
@@ -368,59 +363,6 @@ var EndpointInfo = React.createClass({
         </tr>
       </tbody>
     </Table>;
-  }
-});
-
-// Histogram for a single Endpoint
-var EndpointHisto = React.createClass({
-  getInitialState: function() {
-    return {data: []};
-  },
-  loadInfo: function(id) {
-    $.ajax({
-      url: base + "mv_endpoint_info?" + $.param({"endpoint_id":"eq."+id}),
-      dataType: 'json',
-      cache: true,
-      success: function(data) {
-        var result_req = [];
-        var result_rec = [];
-        data.forEach((row, index) => {
-          result_rec.push(row.records);
-          result_req.push(row.requests);
-        });
-        var d = {
-            requests: result_req.join(),
-            records: result_rec.join()
-        }
-        this.setState({data: d});
-        console.log('data: ' + JSON.stringify(this.state.data));
-      }.bind(this),
-      error: function(xhr, status, err) {
-        console.log(this.url, status, err.toString());
-      }
-    });
-  },
-  componentDidMount: function() {
-    var endpoint = this.props.endpoint;
-    if (endpoint)
-      this.loadInfo(endpoint);
-//    console.log("componentDidMount: before spark");
- //   spark();
- //   console.log("after spark");
-  },
-  componentWillReceiveProps: function (nextProps) {
-    var endpoint = nextProps.endpoint;
-    if (endpoint) {
-      this.loadInfo(endpoint);
-    }
-    console.log("componentWillRecieveProps: before spark");
-    spark();
-    console.log("after spark");
-  },
-  render: function() {
-    return <div>
-      <span className="inlinebar" id="histogram">{this.state.data.records}</span>
-    </div>;
   }
 });
 
