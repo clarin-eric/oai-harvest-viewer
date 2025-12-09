@@ -1,0 +1,23 @@
+.oai-header {
+    margin: 0px;
+}
+
+.oai-header h1 {
+    margin: 0px;
+    border: none;
+}
+
+.section {
+    font-weight: bold;
+    font-size: larger;
+}
+
+.pagination {
+    margin: 0px;
+}
+
+.table-striped tbody tr.highlight td { background-color: #337AB7; color: #fff; }
+
+tr.latest td {
+    font-weight: bold;
+}
