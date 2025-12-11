@@ -404,18 +404,12 @@ var EndpointHisto = React.createClass({
     var endpoint = this.props.endpoint;
     if (endpoint)
       this.loadInfo(endpoint);
-//    console.log("componentDidMount: before spark");
- //   spark();
- //   console.log("after spark");
   },
   componentWillReceiveProps: function (nextProps) {
     var endpoint = nextProps.endpoint;
     if (endpoint) {
       this.loadInfo(endpoint);
     }
-    console.log("componentWillRecieveProps: before spark");
-    spark();
-    console.log("after spark");
   },
   render: function() {
     return <div>
