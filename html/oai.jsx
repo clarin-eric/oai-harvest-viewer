@@ -616,13 +616,14 @@ var RecordInfo = React.createClass({
 });
 
 function histo(sample = [[0,1],[1,3],[2,2],[3,4],[4,6],[5,6]]) {
-//    const sample = this.state.data.records;
     const svg = d3.select('svg');
     const svgContainer = d3.select('#container');
     
-    const margin = 80;
-    const width = 1000 - 2 * margin;
-    const height = 600 - 2 * margin;
+    // deze waarden bepalen het formaat van het diagram
+    // zouden 'automatisch' moeten worden bepaald?
+    const margin = 10;
+    const width = 320 - 2 * margin;
+    const height = 150 - 2 * margin;
 
     const chart = svg.append('g')
       .attr('transform', `translate(${margin}, ${margin})`);
