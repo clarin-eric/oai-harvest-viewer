@@ -385,12 +385,12 @@ var EndpointHisto = React.createClass({
         var result_req = [];
         var result_rec = [];
         data.forEach((row, index) => {
-          result_rec.push(row.records);
+          result_rec.push([index,row.records]);
           result_req.push(row.requests);
         });
         var d = {
-            requests: result_req.join(),
-            records: result_rec.join()
+            requests: result_req,
+            records: result_rec
         }
         this.setState({data: d});
         console.log('data: ' + JSON.stringify(this.state.data));
@@ -419,7 +419,7 @@ var EndpointHisto = React.createClass({
   },
   render: function() {
     return <div>
-      <span className="inlinebar" id="histogram">{this.state.data.records}</span>
+      <span className="inlinebar" id="histogram"><svg>{histo(this.state.data.records)}</svg></span>
     </div>;
   }
 });
@@ -620,6 +620,65 @@ var RecordInfo = React.createClass({
     </Table>;
   }
 });
+
+function histo(sample = [[0,1],[1,3],[2,2],[3,4],[4,6],[5,6]]) {
+//    const sample = this.state.data.records;
+    const svg = d3.select('svg');
+    const svgContainer = d3.select('#container');
+    
+    const margin = 80;
+    const width = 1000 - 2 * margin;
+    const height = 600 - 2 * margin;
+
+    const chart = svg.append('g')
+      .attr('transform', `translate(${margin}, ${margin})`);
+
+    const xScale = d3.scaleBand()
+      .range([0, width])
+      .domain(sample.map((s) => s[0]))
+      .padding(0.4)
+    
+    const yScale = d3.scaleLinear()
+      .range([height, 0])
+      .domain([0, 5]);
+
+    const makeYLines = () => d3.axisLeft()
+      .scale(yScale)
+
+    chart.append('g')
+      .attr('transform', `translate(0, ${height})`)
+      .call(d3.axisBottom(xScale));
+
+    chart.append('g')
+      .call(d3.axisLeft(yScale));
+
+    chart.append('g')
+      .attr('class', 'grid')
+      .call(makeYLines()
+        .tickSize(-width, 0, 0)
+        .tickFormat('')
+      )
+
+    const barGroups = chart.selectAll()
+      .data(sample)
+      .enter()
+      .append('g')
+
+    barGroups
+      .append('rect')
+      .attr('class', 'bar')
+      .attr('x', (g) => xScale(g[0]))
+      .attr('y', (g) => yScale(g[1]))
+      .attr('height', (g) => height - yScale(g[1]))
+      .attr('width', xScale.bandwidth())
+
+    barGroups 
+      .append('text')
+      .attr('class', 'value')
+      .attr('x', (a) => xScale(a[0]) + xScale.bandwidth() / 2)
+      .attr('y', (a) => yScale(a[1]) + 30)
+
+    };
 
 // "main"
 ReactDOM.render(
