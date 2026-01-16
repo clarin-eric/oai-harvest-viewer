@@ -6,7 +6,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
-import net.java.truevfs.access.TPath;
 
 /**
  * @author Menzo Windhouwer
@@ -34,7 +33,7 @@ public class Main {
         OptionSet options = parser.parse(args);
         if (options.has("o")) {
             overview = (String)options.valueOf("o");
-            Path path = new TPath(overview);
+            Path path = Paths.get(overview);
             if (!Files.isRegularFile(path)) {
                 System.err.println("FTL: the overview file["+path.toAbsolutePath()+"] doesn't exist!");
                 System.exit(1);
@@ -71,7 +70,7 @@ public class Main {
         // check if the expected directory structure exists:
         // $DIR/oai-pmh/<repo>/<oai-response>.xml
         // $DIR/results/<format>/<repo>/<oai-record>.xml
-        Path path = new TPath(dir+"/"+reqs);
+        Path path = Paths.get(dir+"/"+reqs);
         if (!Files.isDirectory(path)) {
             System.err.println("FTL: the OAI requests directory["+path.toAbsolutePath()+"] doesn't exist!");
             System.exit(1);
@@ -80,7 +79,7 @@ public class Main {
             System.err.println("FTL: the OAI requests directory["+path.toAbsolutePath()+"] can't be read!");
             System.exit(1);
         }
-        path = new TPath(dir+"/"+fmts);
+        path = Paths.get(dir+"/"+fmts);
         if (!Files.isDirectory(path)) {
             System.err.println("FTL: the results directory["+path.toAbsolutePath()+"] doesn't exist!");
             System.exit(1);
@@ -96,7 +95,7 @@ public class Main {
         harvest.setRequestDirName(reqs);
         harvest.setType(type);
         if (overview!=null)
-            harvest.setOverview(new TPath(overview));
+            harvest.setOverview(Paths.get(overview));
         harvest.crawl();
     }
 }
