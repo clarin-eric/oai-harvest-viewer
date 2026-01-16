@@ -21,43 +21,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.2.0</version>
-        </dependency>
-        <!-- TrueVFS -->
-        <dependency>
-            <groupId>net.java.truevfs</groupId>
-            <artifactId>truevfs-access</artifactId>
-            <version>${truevfs.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.java.truevfs</groupId>
-            <artifactId>truevfs-kernel-impl_${truevfs.scalaTarget}</artifactId>
-            <version>${truevfs.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.java.truevfs</groupId>
-            <artifactId>truevfs-ext-logging_${truevfs.scalaTarget}</artifactId>
-            <version>${truevfs.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.java.truevfs</groupId>
-            <artifactId>truevfs-driver-file</artifactId>
-            <version>${truevfs.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.java.truevfs</groupId>
-            <artifactId>truevfs-driver-zip</artifactId>
-            <version>${truevfs.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.java.truecommons</groupId>
-            <artifactId>truecommons-key-default</artifactId>
-            <version>${truecommons.version}</version>
-            <scope>runtime</scope>
+            <version>1.2.13</version>
         </dependency>
     </dependencies>
     <properties>
