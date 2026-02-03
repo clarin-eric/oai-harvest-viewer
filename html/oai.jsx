@@ -9,6 +9,7 @@ var Pagination = ReactBootstrap.Pagination;
 var Grid = ReactBootstrap.Grid;
 var Row = ReactBootstrap.Row;
 var Col = ReactBootstrap.Col;
+var Alert = ReactBootstrap.Alert;
 
 // A list of Harvests
 var Harvests = React.createClass({
@@ -421,7 +422,7 @@ var EndpointHisto = React.createClass({
 // A list of Records
 var Records = React.createClass({
   getInitialState: function() {
-    return {data: [], meta: {count:0}, page:1, endpoint:0, harvest:0, filter:""};
+    return {data: [], meta: {count:null}, page:1, endpoint:0, harvest:0, filter:""};
   },
   loadRecords: function(endpoint,harvest,page,filter) {
     $(".records .highlight").removeClass("highlight");
@@ -438,7 +439,9 @@ var Records = React.createClass({
       filter = '';
     if (filter != "")
       params["identifier"]="like."+"*"+filter.replace(/'/g,"''").toLowerCase()+"*";
-      var url = base + "mv_endpoint_record?" +"endpoint=eq."+endpoint+"&harvest=eq."+harvest + "&" + $.param(params);
+    params['endpoint'] = "eq." + endpoint;
+    params['harvest'] = "eq." + harvest;
+    var url = base + "mv_endpoint_record?" + $.param(params);
 //    var url =  base + "/mv_endpoint_record?" + $.param({offset:offset, limit:recPagesize, include_count:true, filter:"(metadataPrefix='cmdi') AND (endpoint="+endpoint+") AND (harvest=.eq("+harvest+"))"+f , api_key:key};
           //
     $.ajax({
@@ -451,8 +454,13 @@ var Records = React.createClass({
       dataType: 'json',
       cache: true,
       success: function(d,status,xhr) {
+        console.log('data (records): ' + JSON.stringify(d));
         var cr = xhr.getResponseHeader('content-range');
         var cnt = cr.split("/")[1];
+          if (cnt==0) {
+              cnt = null;
+          };
+        console.log('cnt: ' + cnt);
         this.setState({data:d, meta:{count:cnt}, page:page, endpoint:endpoint, harvest:harvest, filter:filter});
       }.bind(this),
       error: function(xhr, status, err) {
@@ -487,6 +495,7 @@ var Records = React.createClass({
     var filter = this.state.filter;
     var page = this.state.page;
     var pages = Math.ceil(this.state.meta.count / recPagesize);
+      console.log('count: ' + this.state.meta.count);
     var records = this.state.data.map(function(type,location,record) {
       return (
         <Record key={"r"+record.id} id={record.id} harvest={record.harvest} type={type} endpoint={record.endpoint} identifier={record.identifier} location={location}/>
@@ -495,6 +504,11 @@ var Records = React.createClass({
     var glyph = <Button onClick={this.handleFilter}>
       <Glyphicon glyph="filter" />
     </Button>;
+    if (this.state.meta.count == 0) {
+        return <NoRecords/>
+    }
+      else
+    {
     return <div>
       <Row>
         <Col xs={12} md={12} className="recordsHeader" fill>
@@ -539,8 +553,20 @@ var Records = React.createClass({
         </Col>
       </Row>
     </div>;
+    }
   }
 });
+
+var NoRecords = React.createClass({
+  render: function() {
+  return <div>
+    <Alert variant="info">
+      <p>No records list for this harvest.</p>
+    </Alert>
+    </div>;
+  }
+});
+
 
 // A single Record
 var Record = React.createClass({
