@@ -263,7 +263,7 @@ var Endpoints = React.createClass({
         <Col xs={4} md={4} className="endpointInfo" fill>
           <Panel header="Endpoint Info">
             <div id="_endpointInfo">Select an Endpoint</div>
-            <div className="inlinebar" id="_endpointHisto">0,1,2,3,4</div>
+            <div className="inlinebar" id="_endpointHisto"> </div>
           </Panel>
         </Col>
       </Row>
@@ -283,10 +283,10 @@ var Endpoint = React.createClass({
       <EndpointInfo endpoint={this.props.id} type={this.props.type} name={this.props.name} url={this.props.url}/>,
       document.getElementById('_endpointInfo')
     );
-    ReactDOM.render(
-      <EndpointHisto endpoint={this.props.id} type={this.props.type} name={this.props.name} url={this.props.url}/>,
-      document.getElementById('_endpointHisto')
-    );
+//    ReactDOM.render(
+//      <EndpointHisto endpoint={this.props.id} type={this.props.type} name={this.props.name} url={this.props.url}/>,
+//      document.getElementById('_endpointHisto')
+//    );
   },
   render: function() {
     return <tr key={"e"+this.props.id} onClick={this.handleClick}>
@@ -413,8 +413,7 @@ var EndpointHisto = React.createClass({
   },
   render: function() {
     return <div>
-          <!-- 
-      <span className="inlinebar" id="histogram"><svg>{histo(this.state.data.records)}</svg></span> -->
+      <span className="inlinebar" id="histogram"><svg>{histo(this.state.data.records)}</svg></span>
     </div>;
   }
 });
