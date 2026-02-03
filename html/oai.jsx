@@ -413,7 +413,8 @@ var EndpointHisto = React.createClass({
   },
   render: function() {
     return <div>
-      <span className="inlinebar" id="histogram"><svg>{histo(this.state.data.records)}</svg></span>
+          <!-- 
+      <span className="inlinebar" id="histogram"><svg>{histo(this.state.data.records)}</svg></span> -->
     </div>;
   }
 });
