@@ -58,7 +58,7 @@ var Harvests = React.createClass({
   },
   handleSelect: function (event, selectedEvent) {
     var page = selectedEvent.eventKey;
-    console.log('clicked on paging button (Harvests)');
+    // console.log('clicked on paging button (Harvests)');
     this.loadHarvests(page);
   },
   render: function() {
@@ -202,7 +202,7 @@ var Endpoints = React.createClass({
   },
   handleSelect: function (event, selectedEvent) {
     var page = selectedEvent.eventKey;
-      console.log('clicked on paging button (Endpoint)');
+    // console.log('clicked on paging button (Endpoint)');
     this.loadEndpoints(page,this.state.filter,this.props.harvest);
   },
   handleFilter: function () {
@@ -309,7 +309,6 @@ var EndpointInfo = React.createClass({
       cache: true,
       success: function(data) {
         this.setState({data: data[0]});
-        console.log('data: ' + JSON.stringify(this.state.data));
       }.bind(this),
       error: function(xhr, status, err) {
         console.log(this.url, status, err.toString());
@@ -394,7 +393,6 @@ var EndpointHisto = React.createClass({
             records: result_rec
         }
         this.setState({data: d});
-        console.log('data: ' + JSON.stringify(this.state.data));
       }.bind(this),
       error: function(xhr, status, err) {
         console.log(this.url, status, err.toString());
@@ -454,13 +452,8 @@ var Records = React.createClass({
       dataType: 'json',
       cache: true,
       success: function(d,status,xhr) {
-        console.log('data (records): ' + JSON.stringify(d));
         var cr = xhr.getResponseHeader('content-range');
         var cnt = cr.split("/")[1];
-          if (cnt==0) {
-              cnt = null;
-          };
-        console.log('cnt: ' + cnt);
         this.setState({data:d, meta:{count:cnt}, page:page, endpoint:endpoint, harvest:harvest, filter:filter});
       }.bind(this),
       error: function(xhr, status, err) {
@@ -495,7 +488,6 @@ var Records = React.createClass({
     var filter = this.state.filter;
     var page = this.state.page;
     var pages = Math.ceil(this.state.meta.count / recPagesize);
-      console.log('count: ' + this.state.meta.count);
     var records = this.state.data.map(function(type,location,record) {
       return (
         <Record key={"r"+record.id} id={record.id} harvest={record.harvest} type={type} endpoint={record.endpoint} identifier={record.identifier} location={location}/>
