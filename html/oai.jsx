@@ -217,7 +217,7 @@ var Endpoints = React.createClass({
     var pages = Math.ceil(this.state.meta.count / endPagesize);
     var endpoints = this.state.data.map(function(endpoint) {
       return (
-        <Endpoint key={"e"+endpoint.id} id={endpoint.id} harvest={endpoint.harvest_id} name={endpoint.name} location={endpoint.location} type={endpoint.type} url={endpoint.url}/>
+        <Endpoint key={"e"+endpoint.id} id={endpoint.endpoint_id} harvest={endpoint.harvest_id} name={endpoint.name} location={endpoint.location} type={endpoint.type} url={endpoint.url}/>
       );
     });
     var glyph = <Button onClick={this.handleFilter}>
