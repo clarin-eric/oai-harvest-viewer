@@ -506,8 +506,8 @@ CREATE FUNCTION api.delete_old_data(dtype text) RETURNS void
 BEGIN
     DELETE FROM api.request where endpoint_harvest IN (
       WITH last AS
-        ( SELECT id FROM api. harvest WHERE harvest.type=type ORDER BY harvest.when DESC LIMIT 1)
-        SELECT id FROM api. endpoint_harvest WHERE harvest NOT IN (select * from last)
+        ( SELECT id FROM api.harvest WHERE harvest.type=dtype ORDER BY harvest.when DESC LIMIT 1)
+        SELECT id FROM api.endpoint_harvest WHERE harvest NOT IN (select * from last)
 );
 END;
 $$;
