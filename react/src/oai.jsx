@@ -9,7 +9,6 @@ var Pagination = ReactBootstrap.Pagination;
 var Grid = ReactBootstrap.Grid;
 var Row = ReactBootstrap.Row;
 var Col = ReactBootstrap.Col;
-var Alert = ReactBootstrap.Alert;
 
 // A list of Harvests
 var Harvests = React.createClass({
@@ -58,7 +57,7 @@ var Harvests = React.createClass({
   },
   handleSelect: function (event, selectedEvent) {
     var page = selectedEvent.eventKey;
-    // console.log('clicked on paging button (Harvests)');
+    console.log('clicked on paging button (Harvests)');
     this.loadHarvests(page);
   },
   render: function() {
@@ -202,7 +201,7 @@ var Endpoints = React.createClass({
   },
   handleSelect: function (event, selectedEvent) {
     var page = selectedEvent.eventKey;
-    // console.log('clicked on paging button (Endpoint)');
+      console.log('clicked on paging button (Endpoint)');
     this.loadEndpoints(page,this.state.filter,this.props.harvest);
   },
   handleFilter: function () {
@@ -217,7 +216,7 @@ var Endpoints = React.createClass({
     var pages = Math.ceil(this.state.meta.count / endPagesize);
     var endpoints = this.state.data.map(function(endpoint) {
       return (
-        <Endpoint key={"e"+endpoint.id} id={endpoint.endpoint_id} harvest={endpoint.harvest_id} name={endpoint.name} location={endpoint.location} type={endpoint.type} url={endpoint.url}/>
+        <Endpoint key={"e"+endpoint.id} id={endpoint.id} harvest={endpoint.harvest_id} name={endpoint.name} location={endpoint.location} type={endpoint.type} url={endpoint.url}/>
       );
     });
     var glyph = <Button onClick={this.handleFilter}>
@@ -264,7 +263,7 @@ var Endpoints = React.createClass({
         <Col xs={4} md={4} className="endpointInfo" fill>
           <Panel header="Endpoint Info">
             <div id="_endpointInfo">Select an Endpoint</div>
-            <div className="inlinebar" id="_endpointHisto"> </div>
+            <div className="inlinebar" id="_endpointHisto">0,1,2,3,4</div>
           </Panel>
         </Col>
       </Row>
@@ -284,10 +283,10 @@ var Endpoint = React.createClass({
       <EndpointInfo endpoint={this.props.id} type={this.props.type} name={this.props.name} url={this.props.url}/>,
       document.getElementById('_endpointInfo')
     );
-//    ReactDOM.render(
-//      <EndpointHisto endpoint={this.props.id} type={this.props.type} name={this.props.name} url={this.props.url}/>,
-//      document.getElementById('_endpointHisto')
-//    );
+    ReactDOM.render(
+      <EndpointHisto endpoint={this.props.id} type={this.props.type} name={this.props.name} url={this.props.url}/>,
+      document.getElementById('_endpointHisto')
+    );
   },
   render: function() {
     return <tr key={"e"+this.props.id} onClick={this.handleClick}>
@@ -309,6 +308,7 @@ var EndpointInfo = React.createClass({
       cache: true,
       success: function(data) {
         this.setState({data: data[0]});
+        console.log('data: ' + JSON.stringify(this.state.data));
       }.bind(this),
       error: function(xhr, status, err) {
         console.log(this.url, status, err.toString());
@@ -385,14 +385,15 @@ var EndpointHisto = React.createClass({
         var result_req = [];
         var result_rec = [];
         data.forEach((row, index) => {
-          result_rec.push([index,row.records]);
+          result_rec.push(row.records);
           result_req.push(row.requests);
         });
         var d = {
-            requests: result_req,
-            records: result_rec
+            requests: result_req.join(),
+            records: result_rec.join()
         }
         this.setState({data: d});
+        console.log('data: ' + JSON.stringify(this.state.data));
       }.bind(this),
       error: function(xhr, status, err) {
         console.log(this.url, status, err.toString());
@@ -403,16 +404,22 @@ var EndpointHisto = React.createClass({
     var endpoint = this.props.endpoint;
     if (endpoint)
       this.loadInfo(endpoint);
+//    console.log("componentDidMount: before spark");
+ //   spark();
+ //   console.log("after spark");
   },
   componentWillReceiveProps: function (nextProps) {
     var endpoint = nextProps.endpoint;
     if (endpoint) {
       this.loadInfo(endpoint);
     }
+    console.log("componentWillRecieveProps: before spark");
+    spark();
+    console.log("after spark");
   },
   render: function() {
     return <div>
-      <span className="inlinebar" id="histogram"><svg>{histo(this.state.data.records)}</svg></span>
+      <span className="inlinebar" id="histogram">{this.state.data.records}</span>
     </div>;
   }
 });
@@ -420,7 +427,7 @@ var EndpointHisto = React.createClass({
 // A list of Records
 var Records = React.createClass({
   getInitialState: function() {
-    return {data: [], meta: {count:null}, page:1, endpoint:0, harvest:0, filter:""};
+    return {data: [], meta: {count:0}, page:1, endpoint:0, harvest:0, filter:""};
   },
   loadRecords: function(endpoint,harvest,page,filter) {
     $(".records .highlight").removeClass("highlight");
@@ -437,9 +444,7 @@ var Records = React.createClass({
       filter = '';
     if (filter != "")
       params["identifier"]="like."+"*"+filter.replace(/'/g,"''").toLowerCase()+"*";
-    params['endpoint'] = "eq." + endpoint;
-    params['harvest'] = "eq." + harvest;
-    var url = base + "mv_endpoint_record?" + $.param(params);
+      var url = base + "mv_endpoint_record?" +"endpoint=eq."+endpoint+"&harvest=eq."+harvest + "&" + $.param(params);
 //    var url =  base + "/mv_endpoint_record?" + $.param({offset:offset, limit:recPagesize, include_count:true, filter:"(metadataPrefix='cmdi') AND (endpoint="+endpoint+") AND (harvest=.eq("+harvest+"))"+f , api_key:key};
           //
     $.ajax({
@@ -496,11 +501,6 @@ var Records = React.createClass({
     var glyph = <Button onClick={this.handleFilter}>
       <Glyphicon glyph="filter" />
     </Button>;
-    if (this.state.meta.count == 0) {
-        return <NoRecords/>
-    }
-      else
-    {
     return <div>
       <Row>
         <Col xs={12} md={12} className="recordsHeader" fill>
@@ -545,20 +545,8 @@ var Records = React.createClass({
         </Col>
       </Row>
     </div>;
-    }
   }
 });
-
-var NoRecords = React.createClass({
-  render: function() {
-  return <div>
-    <Alert variant="info">
-      <p>No records list for this harvest.</p>
-    </Alert>
-    </div>;
-  }
-});
-
 
 // A single Record
 var Record = React.createClass({
@@ -632,66 +620,6 @@ var RecordInfo = React.createClass({
     </Table>;
   }
 });
-
-function histo(sample = [[0,1],[1,3],[2,2],[3,4],[4,6],[5,6]]) {
-    const svg = d3.select('svg');
-    const svgContainer = d3.select('#container');
-    
-    // deze waarden bepalen het formaat van het diagram
-    // zouden 'automatisch' moeten worden bepaald?
-    const margin = 10;
-    const width = 320 - 2 * margin;
-    const height = 150 - 2 * margin;
-
-    const chart = svg.append('g')
-      .attr('transform', `translate(${margin}, ${margin})`);
-
-    const xScale = d3.scaleBand()
-      .range([0, width])
-      .domain(sample.map((s) => s[0]))
-      .padding(0.4)
-    
-    const yScale = d3.scaleLinear()
-      .range([height, 0])
-      .domain([0, 5]);
-
-    const makeYLines = () => d3.axisLeft()
-      .scale(yScale)
-
-    chart.append('g')
-      .attr('transform', `translate(0, ${height})`)
-      .call(d3.axisBottom(xScale));
-
-    chart.append('g')
-      .call(d3.axisLeft(yScale));
-
-    chart.append('g')
-      .attr('class', 'grid')
-      .call(makeYLines()
-        .tickSize(-width, 0, 0)
-        .tickFormat('')
-      )
-
-    const barGroups = chart.selectAll()
-      .data(sample)
-      .enter()
-      .append('g')
-
-    barGroups
-      .append('rect')
-      .attr('class', 'bar')
-      .attr('x', (g) => xScale(g[0]))
-      .attr('y', (g) => yScale(g[1]))
-      .attr('height', (g) => height - yScale(g[1]))
-      .attr('width', xScale.bandwidth())
-
-    barGroups 
-      .append('text')
-      .attr('class', 'value')
-      .attr('x', (a) => xScale(a[0]) + xScale.bandwidth() / 2)
-      .attr('y', (a) => yScale(a[1]) + 30)
-
-    };
 
 // "main"
 ReactDOM.render(

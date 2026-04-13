@@ -36,8 +36,8 @@ public class OAIVisitor extends SimpleFileVisitor<Path> {
         Path loc = harvest.getDirectory().relativize(dir);
         Path name = dir.getName(dir.getNameCount()-1);
         if (!name.toString().equals(this.reqsDirName)) {
-            System.out.format("SELECT insert_endpoint('%s');%n",name);
-            System.out.format("INSERT INTO endpoint_harvest(harvest,endpoint,location) SELECT currval('harvest_id_seq'::regclass),endpoint.id,'%s' FROM endpoint WHERE endpoint.name = '%s';%n",loc,name);
+            System.out.format("SELECT api.insert_endpoint('%s');%n",name);
+            System.out.format("INSERT INTO api.endpoint_harvest(harvest,endpoint,location) SELECT currval('api.harvest_id_seq'::regclass),endpoint.id,'%s' FROM api.endpoint WHERE endpoint.name = '%s';%n",loc,name);
         }
         requests = 0;
         return CONTINUE;
@@ -50,7 +50,7 @@ public class OAIVisitor extends SimpleFileVisitor<Path> {
         }
         System.err.format("-- OAI Request: %s%n", file);
         Path loc = harvest.getDirectory().relativize(file);
-        System.out.format("INSERT INTO request(endpoint_harvest,location) VALUES(currval('endpoint_harvest_id_seq'::regclass),'%s');%n",loc);
+        System.out.format("INSERT INTO api.request(endpoint_harvest,location) VALUES(currval('api.endpoint_harvest_id_seq'::regclass),'%s');%n",loc);
         OAIRequest request = new OAIRequest(file,loc,requests);
         request.getRecords();
         requests++;

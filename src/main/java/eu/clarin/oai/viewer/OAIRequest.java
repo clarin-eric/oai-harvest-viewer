@@ -137,7 +137,7 @@ public class OAIRequest {
                             case XMLEvent2.CHARACTERS:
                                 if (requests==0) {
                                     url = xmlr.getText();
-                                    System.out.format("UPDATE endpoint_harvest SET \"url\" = '%s' WHERE id = currval('endpoint_harvest_id_seq'::regclass);%n", url);
+                                    System.out.format("UPDATE api.endpoint_harvest SET \"url\" = '%s' WHERE id = currval('api.endpoint_harvest_id_seq'::regclass);%n", url);
                                 }
                                 break;
                             case XMLEvent2.END_ELEMENT:
@@ -169,7 +169,7 @@ public class OAIRequest {
                             case XMLEvent2.END_ELEMENT:
                                 if (depth==sdepth && qn.getNamespaceURI().equals(OAI_NS) && qn.getLocalPart().equals("OAI-PMH")) {
                                     if (requests == 0 && url != null)
-                                        System.out.format("UPDATE endpoint_harvest SET \"url\" = '%s?verb=Identify' WHERE id = currval('endpoint_harvest_id_seq'::regclass);%n", url);
+                                        System.out.format("UPDATE api.endpoint_harvest SET \"url\" = '%s?verb=Identify' WHERE id = currval('api.endpoint_harvest_id_seq'::regclass);%n", url);
                                     state = State.STOP;
                                 }
                                 break;
@@ -182,7 +182,7 @@ public class OAIRequest {
                                 String when = xmlr.getText();
                                 try {
                                     Date w = xsd.parse(when);
-                                    System.out.format("UPDATE request SET \"when\" = TIMESTAMP WITH TIME ZONE '%s' WHERE id = (select currval('request_id_seq'::regclass));%n", when);
+                                    System.out.format("UPDATE api.request SET \"when\" = TIMESTAMP WITH TIME ZONE '%s' WHERE id = (select currval('api.request_id_seq'::regclass));%n", when);
                                 } catch(ParseException x) {
                                     System.err.println("-- WRN: skipped faulty date["+when+"] in OAI Request["+request+"]");
                                 }
@@ -204,7 +204,7 @@ public class OAIRequest {
                                     url = uri;
                                 if (!params.equals(""))
                                     uri += "?"+params;
-                                System.out.format("UPDATE request SET url = '%s' WHERE id = (select currval('request_id_seq'::regclass));%n", uri);
+                                System.out.format("UPDATE api.request SET url = '%s' WHERE id = (select currval('api.request_id_seq'::regclass));%n", uri);
                                 break;
                             case XMLEvent2.END_ELEMENT:
                                 if (depth==sdepth && qn.getNamespaceURI().equals(OAI_NS) && qn.getLocalPart().equals("request")) {
@@ -236,7 +236,7 @@ public class OAIRequest {
                                         // identifier sometimes appear multiple times (possibly in other requests to the same endpoint),
                                         // the harvester will overwrite the files using this identifier so only the last one is maintained
                                         // reflected in SQL by doing an UPSERT overwritting only the location and request
-                                        System.out.format("INSERT INTO record(identifier,alfanum,\"metadataPrefix\",location,request) VALUES %n  ");
+                                        System.out.format("INSERT INTO api.record(identifier,alfanum,\"metadataPrefix\",location,request) VALUES %n  ");
                                         System.out.print(records.values().stream().collect(Collectors.joining(",\n  ")));
                                         System.out.format("%n ON CONFLICT ON CONSTRAINT unique_identifier DO UPDATE SET location=EXCLUDED.location,request=EXCLUDED.request;%n");
                                     }
@@ -287,7 +287,7 @@ public class OAIRequest {
                                     System.err.format("-- duplicate! OAI Record: %s%n", id);
                                 else
                                     System.err.format("-- OAI Record: %s%n", id);
-                                String sql = String.format("('%s','%s','oai','%s#%s', currval('request_id_seq'::regclass))", id, toAlfaNum(id), this.location, id);
+                                String sql = String.format("('%s','%s','oai','%s#%s', currval('api.request_id_seq'::regclass))", id, toAlfaNum(id), this.location, id);
                                 // the records map will only retain the info of the last record with a specific identifier
                                 records.put(id,sql);
                                 break;
