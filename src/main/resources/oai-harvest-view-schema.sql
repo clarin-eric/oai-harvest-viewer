@@ -277,6 +277,8 @@ CREATE MATERIALIZED VIEW api.mv_endpoint_info AS
     JOIN api.endpoint_harvest ON (endpoint_harvest.harvest = harvest_id and endpoint_harvest.endpoint = endpoint.id)
     ;
 
+ALTER TABLE api.mv_endpoint_info OWNER TO oai;
+
 -- Name: table_harvest_info
 
 CREATE TABLE api.table_harvest_info (
@@ -331,6 +333,8 @@ CREATE MATERIALIZED VIEW api.mv_harvest_info AS
     JOIN api.mv_endpoint_info ON mv_endpoint_info.harvest_id = table_endpoint_info.harvest_id
     GROUP BY api.table_endpoint_info.harvest_id, harvest."when", harvest.type
     ORDER BY harvest."when" DESC ;
+
+ALTER TABLE api.mv_harvest_info OWNER TO oai;
 
 -- VIEW: endpoint_record
 
