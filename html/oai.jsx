@@ -111,7 +111,7 @@ var Harvests = React.createClass({
             </thead>
             <tbody>
               {harvests}
-              <tr key="totals">
+              <tr key="totals" style="display: none;">
                 <th></th>
                 <th></th>
                 <th>{this.state.data.reduce(function(total,harvest) { return (total + Number(harvest.endpoints));},0)}</th>
