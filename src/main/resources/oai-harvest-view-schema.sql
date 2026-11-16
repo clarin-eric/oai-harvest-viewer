@@ -1,12 +1,15 @@
 CREATE SCHEMA api;
 
-CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
-CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE
+EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+CREATE
+EXTENSION IF NOT EXISTS pg_trgm;
 
 -- TABLE: endpoint
 
-CREATE TABLE api.endpoint (
-    id bigint NOT NULL,
+CREATE TABLE api.endpoint
+(
+    id   bigint NOT NULL,
     name text
 );
 
@@ -18,8 +21,7 @@ CREATE SEQUENCE api.endpoint_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
+    NO MAXVALUE CACHE 1;
 
 ALTER TABLE api.endpoint_id_seq OWNER TO oai;
 
@@ -41,11 +43,12 @@ CREATE INDEX idx_endpoint_name ON api.endpoint USING btree (name);
 
 -- TABLE: harvest
 
-CREATE TABLE api.harvest (
-    id bigint NOT NULL,
-    "when" timestamp with time zone DEFAULT now(),
+CREATE TABLE api.harvest
+(
+    id       bigint NOT NULL,
+    "when"   timestamp with time zone DEFAULT now(),
     location text,
-    type text
+    type     text
 );
 
 ALTER TABLE api.harvest OWNER TO oai;
@@ -56,8 +59,7 @@ CREATE SEQUENCE api.harvest_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
+    NO MAXVALUE CACHE 1;
 
 ALTER TABLE api.harvest_id_seq OWNER TO oai;
 
@@ -75,12 +77,13 @@ ALTER TABLE ONLY api.harvest
 
 -- TABLE: endpoint_harvest
 
-CREATE TABLE api.endpoint_harvest (
-    id bigint NOT NULL,
+CREATE TABLE api.endpoint_harvest
+(
+    id       bigint NOT NULL,
     location text,
-    harvest bigint,
+    harvest  bigint,
     endpoint bigint,
-    url text
+    url      text
 );
 
 ALTER TABLE api.endpoint_harvest OWNER TO oai;
@@ -91,8 +94,7 @@ CREATE SEQUENCE api.endpoint_harvest_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
+    NO MAXVALUE CACHE 1;
 
 ALTER TABLE api.endpoint_harvest_id_seq OWNER TO oai;
 
@@ -113,21 +115,30 @@ ALTER TABLE ONLY api.endpoint_harvest
 CREATE INDEX fki_endpoint_harvest_endpoint ON api.endpoint_harvest USING btree (endpoint);
 
 ALTER TABLE ONLY api.endpoint_harvest
-    ADD CONSTRAINT endpoint_harvest_endpoint FOREIGN KEY (endpoint) REFERENCES api.endpoint(id) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT endpoint_harvest_endpoint FOREIGN KEY (endpoint) REFERENCES api.endpoint(id) ON
+UPDATE CASCADE
+ON
+DELETE
+CASCADE;
 
 CREATE INDEX fki_endpoint_harvest_harvest ON api.endpoint_harvest USING btree (harvest);
 
 ALTER TABLE ONLY api.endpoint_harvest
-    ADD CONSTRAINT endpoint_harvest_harvest FOREIGN KEY (harvest) REFERENCES api.harvest(id) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT endpoint_harvest_harvest FOREIGN KEY (harvest) REFERENCES api.harvest(id) ON
+UPDATE CASCADE
+ON
+DELETE
+CASCADE;
 
 -- TABLE: request
 
-CREATE TABLE api.request (
-    id bigint NOT NULL,
+CREATE TABLE api.request
+(
+    id               bigint NOT NULL,
     endpoint_harvest bigint,
-    location text,
-    url text,
-    "when" timestamp with time zone
+    location         text,
+    url              text,
+    "when"           timestamp with time zone
 );
 
 ALTER TABLE api.request OWNER TO oai;
@@ -138,8 +149,7 @@ CREATE SEQUENCE api.request_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
+    NO MAXVALUE CACHE 1;
 
 ALTER TABLE api.request_id_seq OWNER TO oai;
 
@@ -160,18 +170,23 @@ ALTER TABLE ONLY api.request
 CREATE INDEX fki_request_endpoint_harvest ON api.request USING btree (endpoint_harvest);
 
 ALTER TABLE ONLY api.request
-    ADD CONSTRAINT request_endpoint_harvest FOREIGN KEY (endpoint_harvest) REFERENCES api.endpoint_harvest(id) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT request_endpoint_harvest FOREIGN KEY (endpoint_harvest) REFERENCES api.endpoint_harvest(id) ON
+UPDATE CASCADE
+ON
+DELETE
+CASCADE;
 
 -- TABLE: record
 
-CREATE TABLE api.record (
-    id bigint NOT NULL,
-    identifier text,
-    alfanum text,
+CREATE TABLE api.record
+(
+    id               bigint NOT NULL,
+    identifier       text,
+    alfanum          text,
     "metadataPrefix" text,
-    location text,
-    request bigint,
-    endpoint_name text
+    location         text,
+    request          bigint,
+    endpoint_name    text
 );
 
 ALTER TABLE api.record OWNER TO oai;
@@ -182,8 +197,7 @@ CREATE SEQUENCE api.record_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
+    NO MAXVALUE CACHE 1;
 
 ALTER TABLE api.record_id_seq OWNER TO oai;
 
@@ -207,7 +221,9 @@ ALTER TABLE ONLY api.record
 CREATE INDEX fki_record_request ON api.record USING btree (request);
 
 ALTER TABLE ONLY api.record
-    ADD CONSTRAINT record_request FOREIGN KEY (request) REFERENCES api.request(id) ON DELETE CASCADE;
+    ADD CONSTRAINT record_request FOREIGN KEY (request) REFERENCES api.request(id) ON
+DELETE
+CASCADE;
 
 -- - indices
 
@@ -217,12 +233,13 @@ CREATE INDEX idx_record_endpoint_name ON api.record USING btree (endpoint_name);
 
 -- Name:  table_endpoint_info
 
-CREATE TABLE api.table_endpoint_info (
-    id bigint,
+CREATE TABLE api.table_endpoint_info
+(
+    id          bigint,
     endpoint_id bigint,
-    requests bigint,
-    records bigint,
-    harvest_id bigint
+    requests    bigint,
+    records     bigint,
+    harvest_id  bigint
 );
 
 ALTER TABLE api.table_endpoint_info OWNER TO oai;
@@ -233,8 +250,7 @@ CREATE SEQUENCE api.table_endpoint_info_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
+    NO MAXVALUE CACHE 1;
 
 ALTER TABLE api.table_endpoint_info_id_seq OWNER TO oai;
 
@@ -250,7 +266,11 @@ ALTER TABLE ONLY api.table_endpoint_info
 CREATE INDEX fki_endpoint_info ON api.table_endpoint_info USING btree (endpoint_id);
 
 ALTER TABLE ONLY api.table_endpoint_info
-    ADD CONSTRAINT endpoint_table_endpoint_info FOREIGN KEY (endpoint_id) REFERENCES api.endpoint(id) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT endpoint_table_endpoint_info FOREIGN KEY (endpoint_id) REFERENCES api.endpoint(id) ON
+UPDATE CASCADE
+ON
+DELETE
+CASCADE;
 
 -- - index
 -- Do we need this?
@@ -258,105 +278,72 @@ ALTER TABLE ONLY api.table_endpoint_info
 
 -- VIEW: mv_endpoint_info
 
-CREATE MATERIALIZED VIEW api.mv_endpoint_info AS
-    SELECT
-      table_endpoint_info.id,
-      requests,
-      records,
-      harvest_id,
-      harvest."when",
-      harvest.type,
-      endpoint_id,
-      LOWER(endpoint.name) AS name_lower,
-      endpoint.name,
-      endpoint_harvest.location,
-      endpoint_harvest.url
-    FROM api.table_endpoint_info
-    JOIN api.endpoint ON (endpoint.id = endpoint_id)
-    JOIN api.harvest ON (harvest.id = harvest_id)
-    JOIN api.endpoint_harvest ON (endpoint_harvest.harvest = harvest_id and endpoint_harvest.endpoint = endpoint.id)
-    ;
+CREATE
+MATERIALIZED VIEW api.mv_endpoint_info AS
+SELECT table_endpoint_info.id,
+       requests,
+       records,
+       harvest_id,
+       harvest."when",
+       harvest.type,
+       endpoint_id,
+       LOWER(endpoint.name) AS name_lower,
+       endpoint.name,
+       endpoint_harvest.location,
+       endpoint_harvest.url
+FROM api.table_endpoint_info
+         JOIN api.endpoint ON (endpoint.id = endpoint_id)
+         JOIN api.harvest ON (harvest.id = harvest_id)
+         JOIN api.endpoint_harvest
+              ON (endpoint_harvest.harvest = harvest_id and endpoint_harvest.endpoint = endpoint.id)
+;
 
 ALTER TABLE api.mv_endpoint_info OWNER TO oai;
 
--- Name: table_harvest_info
+-- - index
+-- Supports per-harvest endpoint lookups from the web UI and the
+-- per-harvest consistency check in api.check_harvest_info().
 
-CREATE TABLE api.table_harvest_info (
-    id bigint,
-    harvest_id bigint,
-    endpoints numeric,
-    requests numeric,
-    records numeric,
-    "when" timestamp with time zone,
-    type text
-);
-
-ALTER TABLE api.table_harvest_info OWNER TO oai;
-
--- - primary key
-
-CREATE SEQUENCE api.table_harvest_info_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER TABLE api.table_harvest_info_id_seq OWNER TO oai;
-
-ALTER SEQUENCE api.table_harvest_info_id_seq OWNED BY api.table_harvest_info.id;
-
-ALTER TABLE ONLY api.table_harvest_info ALTER COLUMN id SET DEFAULT nextval('api.table_harvest_info_id_seq'::regclass);
-
-ALTER TABLE ONLY api.table_harvest_info
-    ADD CONSTRAINT key_table_harvest_info PRIMARY KEY (id);
-
--- - foreign key
-
-CREATE INDEX fki_table_harvest_info ON api.table_harvest_info USING btree (harvest_id);
-
-ALTER TABLE ONLY api.table_harvest_info
-    ADD CONSTRAINT harvest_table_harvest_info FOREIGN KEY (harvest_id) REFERENCES api.harvest(id) ON UPDATE CASCADE ON DELETE CASCADE;
+CREATE INDEX idx_mv_endpoint_info_harvest_id ON api.mv_endpoint_info USING btree (harvest_id);
 
 -- VIEW: mv_harvest_info
 
-CREATE MATERIALIZED VIEW api.mv_harvest_info AS
-    SELECT
-      table_endpoint_info.harvest_id,
-      count(mv_endpoint_info.endpoint_id) AS endpoints,
-      SUM(mv_endpoint_info.requests) as requests,
-      SUM(mv_endpoint_info.records) as records,
-      harvest."when",
-      harvest.type
-    FROM api.table_endpoint_info
-    JOIN api.harvest ON (harvest.id = table_endpoint_info.harvest_id)
-    JOIN api.mv_endpoint_info ON mv_endpoint_info.harvest_id = table_endpoint_info.harvest_id
-    GROUP BY api.table_endpoint_info.harvest_id, harvest."when", harvest.type
-    ORDER BY harvest."when" DESC ;
+CREATE
+MATERIALIZED VIEW api.mv_harvest_info AS
+SELECT mv_endpoint_info.harvest_id,
+       count(*)                       AS endpoints,
+       SUM(mv_endpoint_info.requests) as requests,
+       SUM(mv_endpoint_info.records)  as records,
+       harvest."when",
+       harvest.type
+FROM api.mv_endpoint_info
+         JOIN api.harvest ON (harvest.id = mv_endpoint_info.harvest_id)
+GROUP BY mv_endpoint_info.harvest_id, harvest."when", harvest.type
+ORDER BY harvest."when" DESC;
 
 ALTER TABLE api.mv_harvest_info OWNER TO oai;
 
--- VIEW: endpoint_record
+-- VIEW: mv_endpoint_record
 
-CREATE MATERIALIZED VIEW api.mv_endpoint_record AS
- SELECT record.id,
-    LOWER(record.identifier) AS identifier_lower,
-    record.identifier,
-    record."metadataPrefix",
-    record.location,
-    request.id AS request,
-    endpoint_harvest.endpoint,
-    endpoint_harvest.harvest
-    FROM ((api.record
-        JOIN api.request ON ((record.request = request.id))) 
-        JOIN api.endpoint_harvest ON ((request.endpoint_harvest = endpoint_harvest.id))
-        JOIN api.harvest ON ((endpoint_harvest.harvest = harvest.id))
-        JOIN api.table_harvest_info ON ((harvest.id = table_harvest_info.harvest_id)));
-		
+CREATE
+MATERIALIZED VIEW api.mv_endpoint_record AS
+SELECT record.id,
+       LOWER(record.identifier) AS identifier_lower,
+       record.identifier,
+       record."metadataPrefix",
+       record.location,
+       request.id               AS request,
+       endpoint_harvest.endpoint,
+       endpoint_harvest.harvest
+FROM api.record
+         JOIN api.request ON ((record.request = request.id))
+         JOIN api.endpoint_harvest ON ((request.endpoint_harvest = endpoint_harvest.id));
+
 ALTER TABLE api.mv_endpoint_record OWNER TO oai;
 
 CREATE VIEW api.endpoint_record AS
-    SELECT * FROM api.mv_endpoint_record;
+SELECT *
+FROM api.mv_endpoint_record;
 
 ALTER TABLE api.endpoint_record OWNER TO oai;
 
@@ -369,14 +356,15 @@ CREATE INDEX idx_mv_endpoint_record_identifier_lower ON api.mv_endpoint_record U
 
 CREATE FUNCTION api.insert_endpoint(name character varying) RETURNS void
     LANGUAGE plpgsql
-    AS $$
+AS $$
 BEGIN
-	BEGIN
-	    INSERT INTO api."endpoint"("name") VALUES (name);
-	    RETURN;
-	EXCEPTION WHEN unique_violation THEN
-	    -- Do nothing
-	END;
+BEGIN
+INSERT INTO api."endpoint"("name")
+VALUES (name);
+RETURN;
+EXCEPTION WHEN unique_violation THEN
+    -- Do nothing
+END;
 END;
 $$;
 
@@ -386,23 +374,23 @@ ALTER FUNCTION api.insert_endpoint(name character varying) OWNER TO oai;
 
 CREATE FUNCTION api.link_harvest_records(hid bigint) RETURNS void
     LANGUAGE plpgsql
-    AS $$
+AS $$
 BEGIN
-    UPDATE api.record 
-    SET identifier = rr.identifier, request = rr.request
-    FROM (
-      SELECT r.id, oai.identifier, oai.request
-      FROM api.record AS r, api.record AS oai, api.request, api.endpoint_harvest, api.endpoint
-      WHERE r.request ISNULL
-        AND oai.alfanum = r.alfanum
-        AND oai."metadataPrefix" = 'oai'
-        AND oai.request = request.id
-        AND request.endpoint_harvest = endpoint_harvest.id
-        AND endpoint_harvest.endpoint = endpoint.id
-        AND endpoint.name = r.endpoint_name
-        AND endpoint_harvest.harvest = hid
-    ) AS rr
-    WHERE record.id = rr.id;
+UPDATE api.record
+SET identifier = rr.identifier,
+    request    = rr.request FROM (
+             SELECT r.id, oai.identifier, oai.request
+             FROM api.record AS r, api.record AS oai, api.request, api.endpoint_harvest, api.endpoint
+             WHERE r.request ISNULL
+               AND oai.alfanum = r.alfanum
+               AND oai."metadataPrefix" = 'oai'
+               AND oai.request = request.id
+               AND request.endpoint_harvest = endpoint_harvest.id
+               AND endpoint_harvest.endpoint = endpoint.id
+               AND endpoint.name = r.endpoint_name
+               AND endpoint_harvest.harvest = hid
+         ) AS rr
+WHERE record.id = rr.id;
 END;
 $$;
 
@@ -412,15 +400,17 @@ ALTER FUNCTION api.link_harvest_records(hid bigint) OWNER TO oai;
 
 CREATE FUNCTION api.check_harvests() RETURNS void
     LANGUAGE plpgsql
-    AS $$
+AS $$
 DECLARE
-    cnt bigint;
+cnt bigint;
 BEGIN
-    cnt := (SELECT COUNT(*) FROM api.record WHERE identifier IS NULL) ;
+    cnt
+:= (SELECT COUNT(*) FROM api.record WHERE identifier IS NULL) ;
 
-    IF (cnt > 0) THEN
+    IF
+(cnt > 0) THEN
         RAISE WARNING '[%] record(s) without identifier!', cnt;
-    END IF;
+END IF;
 END;
 $$;
 
@@ -431,88 +421,123 @@ ALTER FUNCTION api.check_harvests() OWNER TO oai;
 
 CREATE FUNCTION api.insert_endpoint_info(hid bigint) RETURNS void
     LANGUAGE plpgsql
-    AS $$
+AS $$
 BEGIN
-    INSERT INTO api.table_endpoint_info (endpoint_id, requests, records, harvest_id)
-    SELECT
-      endpoint.id,
-      COALESCE(requests.count, (0)::bigint) AS requests,
-      COALESCE(records.count, (0)::bigint) AS records,
-      harvest.id AS harvest_id
-    FROM api.endpoint_harvest
-    JOIN api.endpoint ON (endpoint.id = endpoint_harvest.endpoint)
-    JOIN api.harvest ON (harvest.id = endpoint_harvest.harvest)
-    LEFT JOIN ( -- get # requests
-      SELECT
-        request.endpoint_harvest,
-        count(*) AS count
-      FROM api.request
-      GROUP BY request.endpoint_harvest
-    ) requests ON (requests.endpoint_harvest = endpoint_harvest.id)
-    LEFT JOIN ( -- get # records
-      SELECT
-        request.endpoint_harvest,
-        count(*) AS count
-      FROM api.request
-      JOIN api.record ON (record.request = request.id)
-      WHERE (record."metadataPrefix" = 'cmdi'::text)
-      GROUP BY request.endpoint_harvest
-    ) records ON (records.endpoint_harvest = endpoint_harvest.id)
-    WHERE endpoint_harvest.harvest=hid;
+INSERT INTO api.table_endpoint_info (endpoint_id, requests, records, harvest_id)
+SELECT endpoint.id,
+       COALESCE(requests.count, (0)::bigint) AS requests,
+       COALESCE(records.count, (0)::bigint)  AS records,
+       harvest.id                            AS harvest_id
+FROM api.endpoint_harvest
+         JOIN api.endpoint ON (endpoint.id = endpoint_harvest.endpoint)
+         JOIN api.harvest ON (harvest.id = endpoint_harvest.harvest)
+         LEFT JOIN ( -- get # requests
+    SELECT request.endpoint_harvest,
+           count(*) AS count
+    FROM api.request
+    GROUP BY request.endpoint_harvest) requests ON (requests.endpoint_harvest = endpoint_harvest.id)
+         LEFT JOIN ( -- get # records
+    SELECT request.endpoint_harvest,
+           count(*) AS count
+    FROM api.request
+        JOIN api.record
+    ON (record.request = request.id)
+    WHERE (record."metadataPrefix" = 'cmdi'::text)
+    GROUP BY request.endpoint_harvest) records ON (records.endpoint_harvest = endpoint_harvest.id)
+WHERE endpoint_harvest.harvest = hid;
 END;
 $$;
 
 ALTER FUNCTION api.insert_endpoint_info(hid bigint) OWNER TO oai;
 
--- Function: insert latest harvest into harvest_info
+-- FUNCTION: insert_harvest_info (deprecated compatibility stub)
+--
+-- Harvest.java still calls api.insert_harvest_info(hid) after each harvest.
+-- The statistics it used to write into api.table_harvest_info were wrong
+-- (the join condition produced a cartesian product) and are no longer used.
+-- Harvest statistics are now derived exclusively by api.mv_harvest_info.
+-- This function intentionally does nothing. Remove it together with the call
+-- in Harvest.java in a future release.
 
 CREATE FUNCTION api.insert_harvest_info(hid bigint) RETURNS void
     LANGUAGE plpgsql
-    AS $$
+AS $$
 BEGIN
-  INSERT INTO api.table_harvest_info (harvest_id, endpoints, requests, records, "when", type)
-    SELECT lh.id,
-      count(endpoint_harvest.endpoint) AS endpoints,
-      COALESCE(sum(requests.count), (0)::numeric) AS requests,
-      COALESCE(sum(records.count), (0)::numeric) AS records,
-      lh."when",
-      lh.type
-    FROM (((( SELECT h.id,
-          h."when",
-          h.location,
-          h.type
-          FROM (api.harvest h
-              LEFT JOIN api.harvest n ON (((h.type = n.type) AND (h."when" < n."when"))))
-          WHERE (n."when" IS NULL)) lh
-    LEFT JOIN api.endpoint_harvest ON ((lh.id = hid)))
-    LEFT JOIN ( SELECT request.endpoint_harvest,
-            count(*) AS count
-          FROM api.request
-          GROUP BY request.endpoint_harvest) requests ON ((endpoint_harvest.id = requests.endpoint_harvest)))
-    LEFT JOIN ( SELECT request.endpoint_harvest,
-            count(*) AS count
-          FROM (api.request
-            JOIN api.record ON ((request.id = record.request)))
-          WHERE (record."metadataPrefix" = 'oai'::text)
-          GROUP BY request.endpoint_harvest) records ON ((endpoint_harvest.id = records.endpoint_harvest)))
-    GROUP BY lh.id, lh.type, lh."when"
-    ORDER BY lh."when" DESC LIMIT 1;
+    -- no-op
 END;
 $$;
 
 ALTER FUNCTION api.insert_harvest_info(hid bigint) OWNER TO oai;
 
+-- FUNCTION: check_harvest_info
+--
+-- Verify that api.mv_harvest_info agrees with the per-harvest aggregation of
+-- api.mv_endpoint_info. Call with a harvest id to check one harvest, or
+-- without arguments to check all harvests. Inconsistencies are reported as
+-- WARNINGs; the harvest itself is not aborted.
+
+CREATE FUNCTION api.check_harvest_info(hid bigint DEFAULT NULL) RETURNS void
+    LANGUAGE plpgsql
+AS $$
+DECLARE
+bad_count bigint;
+    bad_ids
+text;
+BEGIN
+WITH expected AS (SELECT harvest_id,
+                         count(*)      AS endpoints,
+                         sum(requests) AS requests,
+                         sum(records)  AS records
+                  FROM api.mv_endpoint_info
+                  WHERE hid IS NULL
+                     OR harvest_id = hid
+                  GROUP BY harvest_id),
+     actual AS (SELECT harvest_id,
+                       endpoints,
+                       requests,
+                       records
+                FROM api.mv_harvest_info
+                WHERE hid IS NULL
+                   OR harvest_id = hid),
+     diff AS (SELECT COALESCE(a.harvest_id, e.harvest_id) AS harvest_id
+              FROM actual a
+                       FULL JOIN expected e USING (harvest_id)
+              WHERE a.harvest_id IS NULL
+                 OR e.harvest_id IS NULL
+                 OR a.endpoints <> e.endpoints
+                 OR a.requests <> e.requests
+                 OR a.records <> e.records)
+SELECT count(*), string_agg(harvest_id::text, ', ' ORDER BY harvest_id)
+INTO bad_count, bad_ids
+FROM diff;
+
+IF
+bad_count > 0 THEN
+        RAISE WARNING '[%] harvest_info row(s) inconsistent with mv_endpoint_info: %',
+            bad_count, bad_ids;
+END IF;
+END;
+$$;
+
+ALTER FUNCTION api.check_harvest_info(bigint) OWNER TO oai;
+
 -- FUNCTION: delete all the requests and records from previuous harvests
 
 CREATE FUNCTION api.delete_old_data(dtype text) RETURNS void
     LANGUAGE plpgsql
-    AS $$
+AS $$
 BEGIN
-    DELETE FROM api.request where endpoint_harvest IN (
-      WITH last AS
-        ( SELECT id FROM api.harvest WHERE harvest.type=dtype ORDER BY harvest.when DESC LIMIT 1)
-        SELECT id FROM api.endpoint_harvest WHERE harvest NOT IN (select * from last)
-);
+DELETE
+FROM api.request
+where endpoint_harvest IN (WITH last AS
+                                    (SELECT id
+                                     FROM api.harvest
+                                     WHERE harvest.type = dtype
+                                     ORDER BY harvest.when DESC LIMIT 1)
+SELECT id
+FROM api.endpoint_harvest
+WHERE harvest NOT IN (select * from last)
+    );
 END;
 $$;
 
@@ -521,13 +546,17 @@ ALTER FUNCTION api.delete_old_data(dtype text) OWNER TO oai;
 -- setup postgrest access
 create role view_api nologin;
 
-grant usage on schema api to view_api;
+grant
+usage
+on
+schema
+api to view_api;
 grant select on api.record to view_api;
 grant select on api.request to view_api;
 grant select on api.endpoint to view_api;
 grant select on api.endpoint_harvest to view_api;
 grant select on api.harvest to view_api;
-grant select on api.mv_endpoint_record  to view_api;
+grant select on api.mv_endpoint_record to view_api;
 grant select on api.mv_harvest_info to view_api;
 grant select on api.mv_endpoint_info to view_api;
 

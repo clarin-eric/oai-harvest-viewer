@@ -1,0 +1,14 @@
+server {
+    listen       80;
+    listen  [::]:80;
+    server_name  localhost;
+
+    root   /usr/share/nginx/html;
+    index  index.html;
+
+    # config.js is rendered from html/config.js by the nginx envsubst templates step
+    location = /config.js {
+        alias /etc/nginx/conf.d/config.js;
+        add_header Cache-Control "no-store";
+    }
+}
