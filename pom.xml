@@ -3,35 +3,31 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>eu.clarin.oai</groupId>
     <artifactId>oai-harvest-viewer</artifactId>
-    <version>2.0.0</version>
+    <version>2.0.3</version>
     <name>OAI Harvest Viewer</name>
     <packaging>jar</packaging>
     <dependencies>
         <dependency>
             <groupId>net.sf.jopt-simple</groupId>
             <artifactId>jopt-simple</artifactId>
-            <version>4.8</version>
+            <version>4.9</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.woodstox</groupId>
             <artifactId>woodstox-core-asl</artifactId>
-            <version>4.2.0</version>
+            <version>4.4.1</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.2.13</version>
+            <version>1.6.5</version>
         </dependency>
     </dependencies>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <!-- versions of dependencies -->
-        <truevfs.version>0.12.2</truevfs.version>
-        <truevfs.scalaTarget>2.13</truevfs.scalaTarget>
-        <truecommons.version>2.5.0</truecommons.version>
     </properties>
     <build>
         <plugins>
